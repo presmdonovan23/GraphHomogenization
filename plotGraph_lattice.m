@@ -21,13 +21,7 @@ fh = figure;
 hold on
 
 if dim == 2
-    plot(nodes(:,1),nodes(:,2),'b.','markersize',35);
     
-    if plotEdges
-        quiver( nodes(edges(:,1),1),nodes(edges(:,1),2),...
-                edgeJumps(:,1),edgeJumps(:,2),...
-                'color','black','autoscale','off','MaxHeadSize',maxHeadSize);
-    end
     if plotObs
 
         cornerX = .5 - obRad;
@@ -36,7 +30,7 @@ if dim == 2
         
         if strcmpi(geometry,'circle')
             curvature = [1 1];
-        elseif strcmpi(geometry,'square')
+        elseif strcmpi(geometry,'square') || strcmpi(geometry,'squareSlowdown')
             curvature = [0 0];
         end
         
@@ -45,15 +39,16 @@ if dim == 2
                     'Curvature',curvature);
 
     end
-elseif dim == 3
-    plot3(nodes(:,1),nodes(:,2),nodes(:,3),'b.','markersize',35);
     
     if plotEdges
-        quiver3(nodes(edges(:,1),1),nodes(edges(:,1),2),nodes(edges(:,1),3),...
-                edgeJumps(:,1),edgeJumps(:,2),edgeJumps(:,3),...
+        quiver( nodes(edges(:,1),1),nodes(edges(:,1),2),...
+                edgeJumps(:,1),edgeJumps(:,2),...
                 'color','black','autoscale','off','MaxHeadSize',maxHeadSize);
     end
     
+    plot(nodes(:,1),nodes(:,2),'b.','markersize',35);
+    
+elseif dim == 3
     if plotObs
         if strcmpi(geometry,'circle')
             center = .5;
@@ -70,6 +65,14 @@ elseif dim == 3
             myDrawCube(center,sideLength,fh);
         end
     end
+    
+    if plotEdges
+        quiver3(nodes(edges(:,1),1),nodes(edges(:,1),2),nodes(edges(:,1),3),...
+                edgeJumps(:,1),edgeJumps(:,2),edgeJumps(:,3),...
+                'color','black','autoscale','off','MaxHeadSize',maxHeadSize);
+    end
+    
+    plot3(nodes(:,1),nodes(:,2),nodes(:,3),'b.','markersize',35);
 end
 
 % only label jumps in 2d

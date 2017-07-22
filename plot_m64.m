@@ -1,12 +1,12 @@
 %% uncomment lines below to include monte carlo
 
-load('results_2d_circle_m64_alpha0_noapprox.mat')
+load('Results/results_2d_circle_m64_alpha0_noapprox.mat')
 % need to run monte carlo for this case
 %load('results_2d_circle_m64_alpha0_noapprox_10000.mat')
 results_alpha0 = results;
-load('results_2d_circle_m64_alpha1_noapprox_10000.mat')
+load('Results/results_2d_circle_m64_alpha1_noapprox_10000.mat')
 results_alpha1 = results;
-load('results_2d_circle_m64_alpham1_noapprox_10000.mat')
+load('Results/results_2d_circle_m64_alpham1_noapprox_10000.mat')
 results_alpham1 = results;
 
 Deff_alpha0 = [1; zeros(10,1)];

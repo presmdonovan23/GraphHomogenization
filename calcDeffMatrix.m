@@ -16,7 +16,10 @@ elseif dim == 3
     term2 = edgeJumps'*(omega_e.*[edgeRates edgeRates edgeRates]);
 end
 
-Deff = .5*(term1 - term2 - term2');
+term1 = .5*term1;
+term2 = -.5*(term2 + term2');
+
+Deff = term1 + term2;
 
 time = toc;
 fprintf('Set up effective diffusivity matrix in %.1f seconds.\n',time);

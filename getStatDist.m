@@ -19,14 +19,28 @@ R = LTFactors.R;
 pi0 = randn(nNodes,1);
 pi0 = pi0./max(abs(pi0));
 
-MSGID = 'MATLAB:nearlySingularMatrix';
-warning('off', MSGID)
+MSGID1 = 'MATLAB:nearlySingularMatrix';
+MSGID2 = 'MATLAB:singularMatrix';
+warning('off', MSGID1)
+warning('off', MSGID2)
+
 pi0 = Q * (U \ (LL \ (P * (R \ pi0))));
-warning('on', MSGID)    
 
 pi0 = pi0./sum(pi0);
-
 relRes = norm(L'*pi0)/norm(pi0);
+
+if relRes > TOL || any(~isfinite(pi0))
+    
+    warning('LU Solver failed. Trying eigs.');
+    [pi0,~] = eigs(L',1,.01);
+    
+    pi0 = pi0./sum(pi0);
+    relRes = norm(L'*pi0)/norm(pi0);
+
+end
+
+warning('on', MSGID1)
+warning('on', MSGID2)
 
 if relRes > TOL
     flag = 2;

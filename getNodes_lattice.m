@@ -40,6 +40,9 @@ else
         elseif dim == 3
             isFree = ~and(abs(nodes(:,:,:,1)-.5) <= R, and(abs(nodes(:,:,:,2)-.5) <= R,abs(nodes(:,:,:,3)-.5) <= R));
         end
+    elseif strcmpi(geometry,'squareSlowdown')
+        mDim = m*ones(1,dim);
+        isFree = true(mDim);
     else
         error('Geometry must be circle or square.');
     end

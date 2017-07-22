@@ -1,17 +1,17 @@
 
-%myrate = @(x,j) rate_circle(x,j,h,D0,alpha,ctr,rho);
-%myrate = @(x,j) rate_square_stick(x,h,D0,rho);
-%myrate = @(x,j) rate_square_stick(x,h,D0,rho);
-saveOn = 1;
+saveOn = 0;
 
-rhoVals = [.5];
-mVals = 4;%2.^[2:9];
+rhoVals = .5;
+mVals = 2.^[2 3 4 5 6];
+%deltaVals = [1 .9 .5 .25 .1 .05 .01 .001 .0001]; % squareSlowdown slowdown coeff
 
 dim = 2;
-geometry = 'circle';
+geometry = 'square';
+
 diagJumps = 0;
 D0 = 1;
 alpha = 0;
+
 K1 = 25;
 K2 = 10;
 
@@ -19,32 +19,44 @@ startNodeInd = 1;
 numTraj = 0;
 plotOn = 0;
 rate = []; % field is current obsolete
-rateCoeffs.alpha = alpha;
-rateCoeffs.K1 = 25;
-rateCoeffs.K2 = 10;
 
 idx = 1;
 for m = mVals
     for rho = rhoVals
-        
-        h = 1/m;
-        
-        ghParams(idx) = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps);
-        ghInput = GraphHomogInput(ghParams(idx));
-        
-        results_homog(idx) = getDeff_homog(ghInput);
-        results_mc(idx) = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn );
-        
-        idx = idx+1;
+        %for delta = deltaVals
+
+            rateCoeffs.alpha = alpha;
+            rateCoeffs.K1 = 25;
+            rateCoeffs.K2 = 10;
+            %rateCoeffs.delta = delta;
+
+            h = 1/m;
+
+            ghParams(idx) = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps);
+            ghInput(idx) = GraphHomogInput(ghParams(idx));
+
+            results_homog(idx) = getDeff_homog(ghInput(idx));
+            results_mc(idx) = getDeff_MC( ghInput(idx), numTraj, startNodeInd, plotOn );
+
+            idx = idx+1;
+        %end
     end
 end
 
 if saveOn
-    dirname = 'Results';
-    filename = sprintf('%s/results_%dd_%s',dirname,dim,geometry);
+    fileName = sprintf('results_%s',myClock(6));
+    
+    dirName = sprintf('Results_%dd_%s',dim,geometry);
     if diagJumps
-        filename = [filename '_diagJumps'];
+        dirName = [dirName '_diagJumps'];
     end
-    filenameFull = myClockFilename(filename);
-    save(filenameFull,'results_homog','results_mc','ghParams');
+    
+    if ~exist(dirName,'dir')
+        mkdir(dirName);
+    end
+    %filename = sprintf('%s/results_%dd_%s',dirname,dim,geometry);
+    %filenameFull = myClockFilename(filename);
+    filenameFull = [dirName '/' fileName];
+    fprintf('Filename: %s\n',filenameFull);
+    save(filenameFull,'results_homog','results_mc','ghParams','ghInput');
 end

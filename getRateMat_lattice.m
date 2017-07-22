@@ -66,6 +66,14 @@ for i = 1:numNbrs
     edgeRates(inds) = curEdgeRates;
 end
 
+if strcmpi(ghParams.geometry,'squareSlowdown')
+    
+    delta = ghParams.rateCoeffs.delta;
+    
+    nodesInObs = find(sqrt(sum((nodes - .5).^2,2)) <= ghParams.R);
+    slowedEdges = or(ismember(edgeStart,nodesInObs),ismember(edgeEnd,nodesInObs));
+    edgeRates(slowedEdges) = edgeRates(slowedEdges)*delta;
+end
 %% set up P
 
 validInds = edgeRates > 0;
