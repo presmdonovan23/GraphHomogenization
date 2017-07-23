@@ -19,34 +19,58 @@ if any(solvability > 1e-10)
     warning('Unit cell problem may not be solvable. Solvability res = %.4e.',norm(unitCell_solvability));
 end
 
-RHS = getUnitCellRHS(L, pi0, ghInput.nodes, ghInput.edges);
+RHS = getUnitCellRHS(ghInput, pi0);
 
-MSGID1 = 'MATLAB:nearlySingularMatrix';
-MSGID2 = 'MATLAB:singularMatrix';
-warning('off', MSGID1)
-warning('off', MSGID2)
-
-omega = Q * (U \ (LL \ (P * (R \ RHS))));
-
-err = L'*omega - RHS;
-normErr = sqrt(sum(err.^2,1));
-normRHS = sqrt(sum(RHS.^2,1));
-relRes = normErr./normRHS;
-
-if any(relRes > TOL) || any(~isfinite(omega(:)))
+% RHS can be zero. In this case, solution is pi0.
+if norm(RHS(:)) < TOL
+    dim = size(ghInput.edgeJumps,2);
+    omega = repmat(pi0,1,dim);
     
-    warning('LU Solver failed. Trying backslash.');
-    omega = L'\RHS;
+    err = L'*omega - RHS;
+    normErr = sqrt(sum(err.^2,1));
+    relRes = normErr;
+else
     
+    MSGID1 = 'MATLAB:nearlySingularMatrix';
+    MSGID2 = 'MATLAB:singularMatrix';
+    warning('off', MSGID1)
+    warning('off', MSGID2)
+
+    omega = Q * (U \ (LL \ (P * (R \ RHS))));
+
     err = L'*omega - RHS;
     normErr = sqrt(sum(err.^2,1));
     normRHS = sqrt(sum(RHS.^2,1));
     relRes = normErr./normRHS;
 
-end
+    if any(relRes > TOL) || any(~isfinite(omega(:)))
 
-warning('on', MSGID1)
-warning('on', MSGID2)
+        warning('LU Solver failed. Trying backslash.');
+        omega = L'\RHS;
+
+        err = L'*omega - RHS;
+        normErr = sqrt(sum(err.^2,1));
+        normRHS = sqrt(sum(RHS.^2,1));
+        relRes = normErr./normRHS;
+
+    end
+
+    if any(relRes > TOL) || any(~isfinite(omega(:)))
+
+        warning('Backslash failed. Perturbing matrix.');
+        omega = (L+eps*rand(size(L)))'\RHS;
+
+        err = L'*omega - RHS;
+        normErr = sqrt(sum(err.^2,1));
+        normRHS = sqrt(sum(RHS.^2,1));
+        relRes = normErr./normRHS;
+
+    end
+
+    warning('on', MSGID1)
+    warning('on', MSGID2)
+    
+end
 
 if any(relRes > TOL)
     flag = 2;
@@ -65,23 +89,31 @@ fprintf('Calculated unit-cell solution in %.1f seconds.\n',time);
     
 end
 
-function RHS = getUnitCellRHS(L, pi0, nodes, edges)
+function RHS = getUnitCellRHS(ghInput, pi0) %L, pi0, nodes, edges, edgeJumps)
 tic
+
+L = ghInput.L;
+nodes = ghInput.nodes;
+edges = ghInput.edges;
+edgeJumps = ghInput.edgeJumps;
 
 [nNodes,dim] = size(nodes);
 
-inJumps = nodes(edges(:,1),:) - nodes(edges(:,2),:);
-inds = abs(inJumps) > .5;
-inJumps(inds) = inJumps(inds) - sign(inJumps(inds));
+%inJumps = nodes(edges(:,1),:) - nodes(edges(:,2),:);
+%inds = abs(inJumps) > .5;
+%inJumps(inds) = inJumps(inds) - sign(inJumps(inds));
+inJumps = -edgeJumps;
 
-rows = edges(:,1);
-cols = edges(:,2);
-pi0_e = sparse(rows,cols,pi0(edges(:,2)));
+rows = edges(:,2);
+cols = edges(:,1);
+pi0_e = sparse(rows,cols,pi0(edges(:,1)));
 
 RHS = zeros(nNodes,dim);
 for i = 1:dim
     
-    nu_ei = sparse(rows,cols,inJumps(:,i));
+    %rows = edges(:,1);
+    %cols = edges(:,2);
+    nu_ei = sparse(rows,cols,edgeJumps(:,i));
     
     RHS(:,i) = sum(pi0_e.*nu_ei.*L',2);
 

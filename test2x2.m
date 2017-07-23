@@ -1,4 +1,79 @@
-function results = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn )
+
+rho = 0;
+m = 2;
+h = 1/m;
+dim = 2;
+geometry = 'square';
+
+diagJumps = 0;
+D0 = 1;
+alpha = 0;
+K1 = 25;
+K2 = 10;
+startNodeInd = 1;
+numTraj = 0;
+plotOn = 0;
+rate = []; % field is current obsolete
+rateCoeffs.alpha = alpha;
+rateCoeffs.K1 = 25;
+rateCoeffs.K2 = 10;
+
+ghParams = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps);
+ghInput = GraphHomogInput(ghParams);
+
+
+%% modify inputs directly
+%setting = 'blockOneSite';
+setting = 'slowOneSite';
+%setting = '';
+delta = .1;
+
+nodes = ghInput.nodes;
+edges = ghInput.edges;
+edgeJumps = ghInput.edgeJumps;
+edgeJumps(5:8,:) = -edgeJumps(5:8,:);
+edgeJumps(13:16,:) = -edgeJumps(13:16,:);
+edgeRates = ghInput.edgeRates;
+
+if strcmpi(setting,'blockOneSite')
+    edgesToRemove = or(edges(:,1) == 4, edges(:,2) == 4);
+    
+    edges(edgesToRemove,:) = [];
+    edgeJumps(edgesToRemove,:) = [];
+    edgeRates(edgesToRemove) = [];
+    nodes(4,:) = [];
+    pi0 = (1/3)*ones(3,1);
+    unitCell_soln = pi0;
+elseif strcmpi(setting,'slowOneSite')
+    edgesToSlow = or(edges(:,1) == 4, edges(:,2) == 4);
+    
+    edgeRates(edgesToSlow) = delta*edgeRates(edgesToSlow);
+    
+    pi0 = (1/4)*ones(4,1);
+    unitCell_soln = [pi0 pi0];
+end
+
+%% calc deff
+[Deff, term1, term2] = calcDeffMatrix( edges, edgeRates, edgeJumps, pi0, unitCell_soln );
+Deff
+
+%% run mc
+numTraj = 50000;
+startInd = 1;
+plotOn = 0;
+L = sparse(edges(:,1),edges(:,2),edgeRates);
+L = L - diag(sum(L,2));
+
+ghInput.L = L;
+ghInput.nodes = nodes;
+ghInput.edges = edges;
+ghInput.edgeRates = edgeRates;
+ghInput.edgeJumps = edgeJumps;
+
+results_mc = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn );
+results_mc.Deff
+
+function results = getDeff_MC( GraphHomogInput, numTraj, startNodeInd, plotOn )
 
 if nargin < 2 || isempty(numTraj)
     numTraj = 1000;
@@ -21,15 +96,10 @@ end
 
 tic
 
-L = ghInput.L;
-edges = ghInput.edges;
-edgeJumps = ghInput.edgeJumps;
-nodes = ghInput.nodes;
-
-if mod(numTraj,100) ~= 0 && numTraj > 0    
-    numTraj = 100*ceil(numTraj/100);
-    fprintf('Rounding numTraj to %d.\n',numTraj);
-end
+L = GraphHomogInput.L;
+edges = GraphHomogInput.edges;
+edgeJumps = GraphHomogInput.edgeJumps;
+nodes = GraphHomogInput.nodes;
 
 if length(startNodeInd) == 1
     startNodeInd = repmat(startNodeInd,numTraj,1);
@@ -37,12 +107,15 @@ end
 
 dim = size(edgeJumps,2);
 numTimeRec = 50;
-tmax = 25;
+tmax = 10;
 
 timeRec = linspace(0,tmax,numTimeRec);
 locInterp = zeros(numTraj,dim,numTimeRec);
 
-
+if mod(numTraj,100) ~= 0 && numTraj > 0    
+    numTraj = 100*ceil(numTraj/100);
+    fprintf('Rounding numTraj to %d.\n',numTraj);
+end
 for p = 1:100
     for i = (1+(p-1)*numTraj/100):(p*numTraj/100)
         
@@ -64,28 +137,19 @@ end
 
 fprintf('\n');
 
-sdInterp = squeeze(sum((locInterp - nodes(startNodeInd,:)).^2,2));
+sdInterp = squeeze(sum(locInterp.^2,2));
 MSD = mean(sdInterp,1);
-
-Deff_all = MSD(2:end)./(2*dim*timeRec(2:end)); % for all Deff estimates
-Deff = Deff_all(end);
-
-DeffVar_all = var(sdInterp./(2*dim*timeRec),[],1);
-DeffVar = DeffVar_all(end);%var(sdInterp(:,end)/(2*dim*tmax));
-
+Deff = MSD(end)/(2*dim*tmax);
+DeffVar = var(sdInterp(:,end)/(2*dim*tmax));
 Deff_CI_low = Deff - 1.96*sqrt(DeffVar)/sqrt(numTraj);
 Deff_CI_high = Deff + 1.96*sqrt(DeffVar)/sqrt(numTraj);
 
 time = toc;
 
 results.numTraj = numTraj;
-results.timeRec = timeRec;
-results.trajectoryPos = locInterp;
 results.startNodeInd = startNodeInd;
 results.Deff = Deff;
-results.Deff_all = Deff_all;
 results.Deff_var = DeffVar;
-results.Deff_var_all = DeffVar_all;
 results.Deff_95CI = [Deff_CI_low,Deff_CI_high];
 
 
@@ -158,6 +222,12 @@ edges_traj(:,2) = node';
 time = time(1:stepNum);
 
 edgeJumps_traj = edgeJumps(edgeInds_traj,:);
+%warning('REMOVE THIS CODE')
+%%
+stepsToNegate = rand(stepNum-1,1) < .5;
+edgeJumps_traj(stepsToNegate,:) = -edgeJumps_traj(stepsToNegate,:);
+
+%%
 loc = zeros(dim,stepNum);
 loc(:,1) = startNode;
 loc(:,2:end) = cumsum(edgeJumps_traj,1)' + startNode';

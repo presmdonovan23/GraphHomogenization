@@ -2,21 +2,21 @@
 saveOn = 0;
 
 rhoVals = .5;
-mVals = 2.^[2 3 4 5 6];
+mVals = 5;%2.^[2];
 %deltaVals = [1 .9 .5 .25 .1 .05 .01 .001 .0001]; % squareSlowdown slowdown coeff
 
 dim = 2;
-geometry = 'square';
+geometry = 'circle';
 
 diagJumps = 0;
 D0 = 1;
-alpha = 0;
+alpha = 1;
 
 K1 = 25;
 K2 = 10;
 
 startNodeInd = 1;
-numTraj = 0;
+numTraj = 10000;
 plotOn = 0;
 rate = []; % field is current obsolete
 
