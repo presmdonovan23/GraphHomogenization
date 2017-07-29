@@ -1,16 +1,16 @@
 
-saveOn = 0;
+saveOn = 1;
 
 rhoVals = .5;
-mVals = 5;%2.^[2];
+mVals = 2.^[2,4,8];
 %deltaVals = [1 .9 .5 .25 .1 .05 .01 .001 .0001]; % squareSlowdown slowdown coeff
 
 dim = 2;
-geometry = 'circle';
+geometry = 'square';
 
-diagJumps = 0;
+diagJumps = 2; % diagJumps = 2 => corrected diagonal jumps
 D0 = 1;
-alpha = 1;
+alpha = 0;
 
 K1 = 25;
 K2 = 10;
@@ -20,6 +20,7 @@ numTraj = 10000;
 plotOn = 0;
 rate = []; % field is current obsolete
 
+clear ghParams ghInput results_homog results_mc
 idx = 1;
 for m = mVals
     for rho = rhoVals
@@ -47,8 +48,10 @@ if saveOn
     fileName = sprintf('results_%s',myClock(6));
     
     dirName = sprintf('Results_%dd_%s',dim,geometry);
-    if diagJumps
+    if diagJumps == 1
         dirName = [dirName '_diagJumps'];
+    elseif diagJumps == 2
+        dirName = [dirName '_diagJumpsCorrected'];
     end
     
     if ~exist(dirName,'dir')

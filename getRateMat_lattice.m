@@ -56,6 +56,10 @@ for i = 1:numNbrs
     % shifting by [i,j,k] gives the neighbor: site + i*e_1 + j*e_2 + k*e_3
     nbrInds = circshift(isFree,shift);
     nonzeroRate = logical(isFree.*nbrInds);
+    
+    if diagJumps == 2
+        isNbrFree{i} = nonzeroRate;
+    end
     nonzeroRate = nonzeroRate(freeInds);
     
     nodeNbrs = nodes - ghParams.h*shift;

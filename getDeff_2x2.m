@@ -1,32 +1,11 @@
+function [ghInput, results_homog, results_mc] = getDeff_2x2(ghParams,numTraj,setting,delta)
 
-rho = 0;
-m = 2;
-h = 1/m;
-dim = 2;
-geometry = 'square';
-
-diagJumps = 0;
-D0 = 1;
-alpha = 0;
-K1 = 25;
-K2 = 10;
 startNodeInd = 1;
-numTraj = 0;
 plotOn = 0;
-rate = []; % field is current obsolete
-rateCoeffs.alpha = alpha;
-rateCoeffs.K1 = 25;
-rateCoeffs.K2 = 10;
 
-ghParams = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps);
 ghInput = GraphHomogInput(ghParams);
 
-
 %% modify inputs directly
-%setting = 'blockOneSite';
-setting = 'slowOneSite';
-%setting = '';
-delta = .1;
 
 nodes = ghInput.nodes;
 edges = ghInput.edges;
@@ -55,12 +34,8 @@ end
 
 %% calc deff
 [Deff, term1, term2] = calcDeffMatrix( edges, edgeRates, edgeJumps, pi0, unitCell_soln );
-Deff
 
 %% run mc
-numTraj = 50000;
-startInd = 1;
-plotOn = 0;
 L = sparse(edges(:,1),edges(:,2),edgeRates);
 L = L - diag(sum(L,2));
 
@@ -70,10 +45,32 @@ ghInput.edges = edges;
 ghInput.edgeRates = edgeRates;
 ghInput.edgeJumps = edgeJumps;
 
+results_homog.L = L;
+results_homog.nodes = nodes;
+results_homog.edges = edges;
+results_homog.edgeRates = edgeRates;
+results_homog.edgeJumps = edgeJumps;
+results_homog.pi0 = pi0;
+results_homog.pi0_res = [];
+results_homog.pi0_flag = [];
+results_homog.pi0_time = [];
+results_homog.unitCell_solvability = [];
+results_homog.unitCell_RHS = [];
+results_homog.unitCell_soln = unitCell_soln;
+results_homog.unitCell_relRes = [];
+results_homog.unitCell_flag = [];
+results_homog.unitCell_time = [];
+results_homog.Deff_mat = Deff;
+results_homog.Deff_term1 = term1;
+results_homog.Deff_term2 = term2;
+results_homog.Deff = Deff(1);
+    
 results_mc = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn );
 results_mc.Deff
 
-function results = getDeff_MC( GraphHomogInput, numTraj, startNodeInd, plotOn )
+end
+
+function results = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn )
 
 if nargin < 2 || isempty(numTraj)
     numTraj = 1000;
@@ -96,10 +93,15 @@ end
 
 tic
 
-L = GraphHomogInput.L;
-edges = GraphHomogInput.edges;
-edgeJumps = GraphHomogInput.edgeJumps;
-nodes = GraphHomogInput.nodes;
+L = ghInput.L;
+edges = ghInput.edges;
+edgeJumps = ghInput.edgeJumps;
+nodes = ghInput.nodes;
+
+if mod(numTraj,100) ~= 0 && numTraj > 0    
+    numTraj = 100*ceil(numTraj/100);
+    fprintf('Rounding numTraj to %d.\n',numTraj);
+end
 
 if length(startNodeInd) == 1
     startNodeInd = repmat(startNodeInd,numTraj,1);
@@ -107,15 +109,12 @@ end
 
 dim = size(edgeJumps,2);
 numTimeRec = 50;
-tmax = 10;
+tmax = 25;
 
 timeRec = linspace(0,tmax,numTimeRec);
 locInterp = zeros(numTraj,dim,numTimeRec);
 
-if mod(numTraj,100) ~= 0 && numTraj > 0    
-    numTraj = 100*ceil(numTraj/100);
-    fprintf('Rounding numTraj to %d.\n',numTraj);
-end
+
 for p = 1:100
     for i = (1+(p-1)*numTraj/100):(p*numTraj/100)
         
@@ -137,21 +136,29 @@ end
 
 fprintf('\n');
 
-sdInterp = squeeze(sum(locInterp.^2,2));
+sdInterp = squeeze(sum((locInterp - nodes(startNodeInd,:)).^2,2));
 MSD = mean(sdInterp,1);
-Deff = MSD(end)/(2*dim*tmax);
-DeffVar = var(sdInterp(:,end)/(2*dim*tmax));
+
+Deff_all = MSD(2:end)./(2*dim*timeRec(2:end)); % for all Deff estimates
+Deff = Deff_all(end);
+
+DeffVar_all = var(sdInterp./(2*dim*timeRec),[],1);
+DeffVar = DeffVar_all(end);%var(sdInterp(:,end)/(2*dim*tmax));
+
 Deff_CI_low = Deff - 1.96*sqrt(DeffVar)/sqrt(numTraj);
 Deff_CI_high = Deff + 1.96*sqrt(DeffVar)/sqrt(numTraj);
 
 time = toc;
 
 results.numTraj = numTraj;
+results.timeRec = timeRec;
+results.trajectoryPos = locInterp;
 results.startNodeInd = startNodeInd;
 results.Deff = Deff;
+results.Deff_all = Deff_all;
 results.Deff_var = DeffVar;
+results.Deff_var_all = DeffVar_all;
 results.Deff_95CI = [Deff_CI_low,Deff_CI_high];
-
 
 if plotOn
     figure
