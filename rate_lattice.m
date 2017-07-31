@@ -26,7 +26,7 @@ if alpha == 0
     val = lambda*ones(nNodes,1);
     
     if ghParams.diagJumps == 2 && strcmpi(geometry,'square') && ghParams.dim == 2
-        val = correctDiag(val,x,y,ghParams);
+        val = correctDiag(val,lambda,x,y,ghParams);
     elseif ghParams.diagJumps == 2
         error('Corrected diagonal jumps only implemented for 2d square with no drift.');
     end
@@ -60,7 +60,7 @@ end
 
 end
 
-function val = correctDiag(val,x,y,ghParams)
+function val = correctDiag(val,lambda,x,y,ghParams)
     h = ghParams.h;
     TOL = 1e-10;
     nu = (1/h)*(y-x);
@@ -115,5 +115,14 @@ function val = correctDiag(val,x,y,ghParams)
     val(case4c & border) = .5*lambda;
     case4d = lowerLeftJump & ((lowerBlocked & ~leftBlocked) | (~lowerBlocked  & leftBlocked));
     val(case4d & border) = .5*lambda;
+    
+    case5a = upperJump & ((~upperRightBlocked & rightBlocked) | (~upperLeftBlocked & leftBlocked));
+    val(case5a & border) = 1.5*lambda;
+    case5b = lowerJump & ((~lowerRightBlocked & rightBlocked) | (~lowerLeftBlocked & leftBlocked));
+    val(case5b & border) = 1.5*lambda;
+    case5c = rightJump & ((~lowerRightBlocked & lowerBlocked) | (~upperRightBlocked & upperBlocked));
+    val(case5c & border) = 1.5*lambda;
+    case5d = leftJump & ((~lowerLeftBlocked & lowerBlocked) | (~upperLeftBlocked & upperBlocked));
+    val(case5d & border) = 1.5*lambda;
 
 end
