@@ -10,13 +10,10 @@ classdef GraphHomogParams_lattice
         rate
         rateCoeffs
         diagJumps % dont need to supply, default is 0
+        ctr
         
     end
-    
-    properties (Access = protected)
-        ctr = .5;
-    end
-    
+        
     properties (Dependent)
         R
         h
@@ -37,6 +34,7 @@ classdef GraphHomogParams_lattice
                 rate = p.rate;
                 rateCoeffs = p.rateCoeffs;
                 diagJumps = p.diagJumps;
+                ctr = p.ctr;
                 
             else
                 
@@ -48,6 +46,11 @@ classdef GraphHomogParams_lattice
                 rate = varargin{6};
                 rateCoeffs = varargin{7};
                 diagJumps = varargin{8};
+                if nargin < 9 || isempty(varargin{9})
+                    ctr = .5;
+                else
+                    ctr = varargin{9};
+                end
                 
             end
             
@@ -59,6 +62,7 @@ classdef GraphHomogParams_lattice
             obj.rate = rate;
             obj.rateCoeffs = rateCoeffs;
             obj.diagJumps = diagJumps;
+            obj.ctr = ctr;
             
         end
         
