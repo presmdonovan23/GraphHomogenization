@@ -1,3 +1,66 @@
+%% Continuous homogenization vs discrete homogenization
+load('Results_2d_square/results_2017_08_05_10_35_27.mat')
+
+x_homog = [1:9];
+y_homog = [2/3 results_homog.Deff];
+x_cont = linspace(1,9,100);
+y_cont = .77*ones(1,100);
+
+fh = figure;
+
+hold on
+plot(x_cont,y_cont,'r-','linewidth',2)
+plot(x_homog,y_homog,'b.-','markersize',20,'linewidth',2)
+
+axis([1 9 .66 .78]);
+axis square
+
+xlabel('Path Length (h)');
+ylabel('D_e^h');
+
+lh = legend('Continuous Homogenization','Graph Homogenization','location','southeast');
+
+ca = gca;
+ca.FontSize = 18;
+ca.XTick = [1:9];
+for i = 1:9
+    ca.XTickLabel{i} = sprintf('2^{-%d}',i);
+end
+
+dirname = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
+
+%mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'fig')
+%mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'png')
+%mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'eps')
+
+%% Plot graph setting w/ square in upper right corner (m = 2,4,8,16)
+fh = figure;
+i = 1;
+ctr = .75;
+saveOn = 0;
+drawObs = 1;
+for m = [2 4 8 16]
+    sph(i) = subplot(2,2,i);
+    if i == 2 || i == 4
+        sph(i).Position = sph(i).Position - [.15 .1 -.15 -.15];
+    else
+        sph(i).Position = sph(i).Position - [.1 .1 -.15 -.15];
+    end
+    rho = .5;
+    %m = 2;
+    geometry = 'square';
+    drawObs = 1;
+    drawSetting(rho,m,ctr,geometry,drawObs,saveOn,fh);
+    i=i+1;
+end
+
+dirname = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
+
+%mySaveFig([dirname 'pathLengthEffectsGraph'],fh,'fig')
+%mySaveFig([dirname 'pathLengthEffectsGraph'],fh,'png')
+%mySaveFig([dirname 'pathLengthEffectsGraph'],fh,'eps')
+
+%% Continuous vs discrete vs discrete w/ diag vs discrete w/ diag corrected
 
 load('/Users/prestondonovan/Documents/School/Research/MATLAB Code/Data Processing/Simulation_2d/FixedPathLength/results.mat');
 results_cont = results;
