@@ -4,9 +4,9 @@ saveOn = 0;
 rho = .45;
 m = 8;
 geometry = 'circle';
-drwaObs = 1;
-
-drawSetting(rho,m,geometry,drawObs,saveOn)
+drawObs = 1;
+ctr = .5;
+drawSetting(rho,m,ctr,geometry,drawObs,saveOn)
 
 %% path length effects
 rho = .5;
@@ -31,3 +31,4 @@ alpha = 1;
 drawObs = 1;
 
 drawDriftField(rho,m,geometry,alpha,drawObs,saveOn);
+ 
