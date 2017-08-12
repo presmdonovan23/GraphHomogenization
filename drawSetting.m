@@ -1,12 +1,14 @@
-function fh = drawSetting(rho,m,geometry,drawObs,saveOn)
+function [fh,ghParams,ghInput] = drawSetting(rho,m,ctr,geometry,drawObs,saveOn,fh)
 
-if nargin < 4 || isempty(drawObs)
+if nargin < 5 || isempty(drawObs)
     drawObs = 1;
 end
-if nargin < 5 || isempty(saveOn)
+if nargin < 6 || isempty(saveOn)
     saveOn = 0;
 end
-
+if nargin < 7 || isempty(fh)
+    fh = figure;
+end
 
 dim = 2;
 
@@ -14,7 +16,8 @@ diagJumps = 0;
 D0 = 1;
 alpha = 0;
 rateCoeffs.alpha = alpha;
-
+rateCoeffs.K1 = 0;
+rateCoeffs.K2 = 0;
 h = 1/m;
 
 epsInv = 1;
@@ -25,10 +28,9 @@ elseif strcmpi(geometry,'square')
     rate = @(x,j) rate_square(x,j,h,D0,alpha,rho);
 end
 
-ghParams = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps);
+ghParams = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps,ctr);
 ghInput = GraphHomogInput(ghParams);
 
-fh = figure;
 hold on
 
 %% draw initial things to get legend entries correct
@@ -48,6 +50,7 @@ for cellNumX = 1:epsInv
 end
 axis square
 axis([-h*epsInv epsInv+h*epsInv -h*epsInv epsInv+h*epsInv])
+axis([-.25 1.25 -.25 1.25]);
 axis off
 
 if saveOn
