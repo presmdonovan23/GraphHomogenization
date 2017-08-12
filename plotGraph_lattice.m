@@ -30,7 +30,7 @@ if dim == 2
         
         if strcmpi(geometry,'circle')
             curvature = [1 1];
-        elseif strcmpi(geometry,'square') || strcmpi(geometry,'squareSlowdown')
+        elseif strcmpi(geometry,'square') || strcmpi(geometry,'squareSlowdown') || strcmpi(geometry,'squareBonding')  || strcmpi(geometry,'squareBdyAttract') || strcmpi(geometry,'squareBdyRepel')
             curvature = [0 0];
         end
         

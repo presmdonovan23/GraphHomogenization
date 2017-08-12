@@ -37,7 +37,7 @@ else
         dist2ctr2 = sum((nodes-ctr).^2,dim+1);
         dist2ctr2 = round(dist2ctr2,m); % eliminate numerical error that could make obstructed sites non-symmetrical
         isFree = dist2ctr2 > R^2;
-    elseif strcmpi(geometry,'square') % ** could be some numerical error for small m where sites are on boundary of obstructed region
+    elseif strcmpi(geometry,'square') || strcmpi(geometry,'squareBonding') || strcmpi(geometry,'squareBdyAttract') || strcmpi(geometry,'squareBdyRepel')  % ** could be some numerical error for small m where sites are on boundary of obstructed region
         if dim == 2
             isFree = ~and(abs(nodes(:,:,1)-ctr) <= R, abs(nodes(:,:,2)-ctr) <= R);
         elseif dim == 3

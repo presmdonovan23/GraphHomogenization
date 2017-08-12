@@ -70,13 +70,61 @@ for i = 1:numNbrs
     edgeRates(inds) = curEdgeRates;
 end
 
-if strcmpi(ghParams.geometry,'squareSlowdown')
-    
+if strcmpi(ghParams.geometry,'circleSlowdown')
+    % Slows all rates of edges starting or ending in square
     delta = ghParams.rateCoeffs.delta;
+    ctr = ghParams.ctr;
     
-    nodesInObs = find(sqrt(sum((nodes - .5).^2,2)) <= ghParams.R);
+    nodesInObs = find(sqrt(sum((nodes - ctr).^2,2)) <= ghParams.R);
     slowedEdges = or(ismember(edgeStart,nodesInObs),ismember(edgeEnd,nodesInObs));
     edgeRates(slowedEdges) = edgeRates(slowedEdges)*delta;
+elseif strcmpi(ghParams.geometry,'squareSlowdown')
+    % Slows all rates of edges starting or ending in square
+    delta = ghParams.rateCoeffs.delta;
+    
+    relCoords = nodes - ghParams.ctr;
+    nodesInObs = find(all(abs(relCoords) < ghParams.rho/2,2));
+    
+    slowedEdges = or(ismember(edgeStart,nodesInObs),ismember(edgeEnd,nodesInObs));
+    edgeRates(slowedEdges) = edgeRates(slowedEdges)*delta;
+elseif strcmpi(ghParams.geometry,'squareBonding')
+    % Slows all rates leaving nodes that are within dist
+    delta = ghParams.rateCoeffs.delta;
+    dist = ghParams.rateCoeffs.dist;
+    
+    relCoords = nodes - ghParams.ctr;
+    nodesAtBdy = find(all(abs(relCoords) < (ghParams.rho/2 + dist),2));
+    
+    slowedEdges = ismember(edgeStart,nodesAtBdy);
+    edgeRates(slowedEdges) = edgeRates(slowedEdges)*delta;
+elseif strcmpi(ghParams.geometry,'squareBdyRepel')
+    % Slows all rates from nodes at boundary to nodes not at boundary
+    delta = ghParams.rateCoeffs.delta;
+    dist = .75*ghParams.h;
+    
+    relCoords = nodes - ghParams.ctr;
+    nodesAtBdy = all(abs(relCoords) < (ghParams.rho/2 + dist),2);
+    nodesNotAtBdy = ~nodesAtBdy;
+    
+    nodesAtBdy = find(nodesAtBdy);
+    nodesNotAtBdy = find(nodesNotAtBdy);
+    
+    acceleratedEdges = ismember(edgeStart,nodesAtBdy) & ismember(edgeEnd,nodesNotAtBdy);
+    edgeRates(acceleratedEdges) = edgeRates(acceleratedEdges)*delta;
+elseif strcmpi(ghParams.geometry,'squareBdyAttract')
+    % Increase all rates from nodes not at boundary to nodes at boundary
+    delta = ghParams.rateCoeffs.delta;
+    dist = .75*ghParams.h;
+    
+    relCoords = nodes - ghParams.ctr;
+    nodesAtBdy = all(abs(relCoords) < (ghParams.rho/2 + dist),2);
+    nodesNotAtBdy = ~nodesAtBdy;
+    
+    nodesAtBdy = find(nodesAtBdy);
+    nodesNotAtBdy = find(nodesNotAtBdy);
+    
+    acceleratedEdges = ismember(edgeStart,nodesNotAtBdy) & ismember(edgeEnd,nodesAtBdy);
+    edgeRates(acceleratedEdges) = edgeRates(acceleratedEdges)*delta;
 end
 %% set up P
 
