@@ -5,7 +5,7 @@ results_cont = results;
 load('/Users/prestondonovan/Documents/School/Research/MATLAB Code/Discrete Homogenization/GraphHomogenization/results/results_2d_square_2017_07_19_09_37_30.mat');
 results_discrete = results_homog;
 ghParams_discrete = ghParams;
-ghInput_discrete = ghInput;
+%ghInput_discrete = ghInput;
 
 load('/Users/prestondonovan/Documents/School/Research/MATLAB Code/Discrete Homogenization/GraphHomogenization/Results_2d_square_diagJumpsCorrected/results_2017_07_31_19_35_21.mat');
 results_discrete_diagC = results_homog;
@@ -24,24 +24,6 @@ pathLen_disc = 1./[ghParams_discrete.m];
 pathLen_disc_diagC = (.5*(sqrt(2) + 1))./[ghParams_discrete_diagC.m];
 pathLen_disc_diag = (.5*(sqrt(2) + 1))./[ghParams_discrete_diag.m];
 
-%{
-pathLen_disc_diagC = zeros(1,length(results_discrete_diagC));
-pathLen_disc_diag = zeros(1,length(results_discrete_diag));
-
-for i = 1:length(results_discrete_diagC)
-    curRes = results_discrete_diagC(i);
-    
-    pathLen = sqrt(sum(curRes.edgeJumps.^2,2));
-    meanPathLen = sum(pathLen.*[curRes.edgeRates])./sum([curRes.edgeRates]);
-    pathLen_disc_diagC(i) = meanPathLen;
-    
-    curRes = results_discrete_diag(i);
-    
-    pathLen = sqrt(sum(curRes.edgeJumps.^2,2));
-    meanPathLen = sum(pathLen.*[curRes.edgeRates])./sum([curRes.edgeRates]);
-    pathLen_disc_diag(i) = meanPathLen;
-end
-%}
 CI = [results_cont.Deff95CI];
 CIlow = CI(1:2:end);
 CIhigh = CI(2:2:end);
@@ -94,11 +76,3 @@ ylabel('Deff')
 ca = gca;
 ca.FontSize = 18;
 ca.XLim(1) = 1;
-%{
-yca = get(gca,'ylabel');
-yca.Position = [ -30.912402524544123 0.720000046491606  -1 ];
-
-xca = get(gca,'xlabel');
-xca.Position = [ 149.9891430511475 0.6631063628431 -0.01 ];
-%}
-%lh.Position = 
