@@ -1,4 +1,4 @@
-function [ghInput, results_homog, results_mc] = getDeff_whirlpool(ghParams,numTraj,removeEdges,rateReduction,plotOn)
+function [ghInput, results_homog, results_mc] = getDeff_whirlpool(ghParams,numTraj,removeEdges,rateReduction,plotOn,plotLambda,plotNodeLabels)
 % the purpose of this driver is to find a setting that satisfies unit-cell
 % solvability but not detailed balance.
 % we set up a simple setting with m = 3 and remove some edges to create a
@@ -6,6 +6,12 @@ function [ghInput, results_homog, results_mc] = getDeff_whirlpool(ghParams,numTr
 % equivalently, e' is removed for some edges). we could also try making
 % some rates very low if this creates issues.
 
+if nargin < 6 || isempty(plotLambda)
+    plotLambda = 1;
+end
+if nargin < 7 || isempty(plotNodeLabels)
+    plotNodeLabels = 1;
+end
 for i = 1:8
     startNodeInd(1 + (i-1)*numTraj:i*numTraj) = i;
 end
@@ -130,6 +136,10 @@ if plotOn
 
     plot(nodes(:,1),nodes(:,2),'b.','markersize',50);
 
+    for i = 1:size(nodes,1)
+        s = sprintf('y_%d',i);
+        text(nodes(i,1) - .09,nodes(i,2) - .06,s,'fontsize',20);
+    end
     if plotEdges
         quiver( nodes(edges(:,1),1),nodes(edges(:,1),2),...
                 edgeJumps(:,1),edgeJumps(:,2),...
@@ -165,7 +175,11 @@ if plotOn
         % plot rates as text
         textloc = nodes(edge(1),:) + .5*jump;
         %rateStr = sprintf('%d',round(rate));%num2str(rate,'%.2f')
-        rateStr = '$\bar{\lambda}$';
+        if plotLambda
+            rateStr = '$\bar{\lambda}$';
+        else
+            rateStr = '';
+        end
         if jump(1) > 10e-6 %edge goes left to right
             textloc(2) = textloc(2) + norm(jump)/10;
 
