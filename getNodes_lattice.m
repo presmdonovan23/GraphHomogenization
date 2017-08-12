@@ -1,10 +1,13 @@
-function [nodes, isFree] = getNodes_lattice( R, m, dim, geometry )
+function [nodes, isFree] = getNodes_lattice( R, m, dim, geometry, ctr )
 % assumes nodes live on lattice
 % assumes cell has length 1
 tic
 
 if nargin < 4
     geometry = 'circle';
+end
+if nargin < 5
+    ctr = .5;
 end
 
 sz = [m*ones(1,dim) dim];
@@ -31,14 +34,14 @@ if R == 0
     isFree = true(mDim);
 else
     if strcmpi(geometry,'circle')
-        dist2ctr2 = sum((nodes-.5).^2,dim+1);
+        dist2ctr2 = sum((nodes-ctr).^2,dim+1);
         dist2ctr2 = round(dist2ctr2,m); % eliminate numerical error that could make obstructed sites non-symmetrical
         isFree = dist2ctr2 > R^2;
     elseif strcmpi(geometry,'square') % ** could be some numerical error for small m where sites are on boundary of obstructed region
         if dim == 2
-            isFree = ~and(abs(nodes(:,:,1)-.5) <= R, abs(nodes(:,:,2)-.5) <= R);
+            isFree = ~and(abs(nodes(:,:,1)-ctr) <= R, abs(nodes(:,:,2)-ctr) <= R);
         elseif dim == 3
-            isFree = ~and(abs(nodes(:,:,:,1)-.5) <= R, and(abs(nodes(:,:,:,2)-.5) <= R,abs(nodes(:,:,:,3)-.5) <= R));
+            isFree = ~and(abs(nodes(:,:,:,1)-ctr) <= R, and(abs(nodes(:,:,:,2)-ctr) <= R,abs(nodes(:,:,:,3)-ctr) <= R));
         end
     elseif strcmpi(geometry,'squareSlowdown')
         mDim = m*ones(1,dim);
