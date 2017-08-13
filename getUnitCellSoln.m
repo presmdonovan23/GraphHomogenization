@@ -16,7 +16,7 @@ end
 
 solvability = sum(ghInput.edgeJumps.*ghInput.edgeRates.*pi0(ghInput.edges(:,1)),1);
 if any(solvability > 1e-10)
-    warning('Unit cell problem may not be solvable. Solvability res = %.4e.',norm(unitCell_solvability));
+    warning('Unit cell problem may not be solvable. Solvability res = %.4e.',norm(solvability));
 end
 
 RHS = getUnitCellRHS(ghInput, pi0);
