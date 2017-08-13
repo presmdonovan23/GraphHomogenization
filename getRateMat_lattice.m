@@ -100,7 +100,7 @@ elseif strcmpi(ghParams.geometry,'squareBonding')
 elseif strcmpi(ghParams.geometry,'squareBdyRepel')
     % Slows all rates from nodes at boundary to nodes not at boundary
     delta = ghParams.rateCoeffs.delta;
-    dist = .75*ghParams.h;
+    dist = ghParams.rateCoeffs.dist;
     
     relCoords = nodes - ghParams.ctr;
     nodesAtBdy = all(abs(relCoords) < (ghParams.rho/2 + dist),2);
@@ -111,10 +111,13 @@ elseif strcmpi(ghParams.geometry,'squareBdyRepel')
     
     acceleratedEdges = ismember(edgeStart,nodesAtBdy) & ismember(edgeEnd,nodesNotAtBdy);
     edgeRates(acceleratedEdges) = edgeRates(acceleratedEdges)*delta;
+    
+    slowedEdges = ismember(edgeStart,nodesNotAtBdy) & ismember(edgeEnd,nodesAtBdy);
+    edgeRates(slowedEdges) = edgeRates(slowedEdges)/delta;
 elseif strcmpi(ghParams.geometry,'squareBdyAttract')
     % Increase all rates from nodes not at boundary to nodes at boundary
     delta = ghParams.rateCoeffs.delta;
-    dist = .75*ghParams.h;
+    dist = ghParams.rateCoeffs.dist;
     
     relCoords = nodes - ghParams.ctr;
     nodesAtBdy = all(abs(relCoords) < (ghParams.rho/2 + dist),2);
@@ -125,6 +128,9 @@ elseif strcmpi(ghParams.geometry,'squareBdyAttract')
     
     acceleratedEdges = ismember(edgeStart,nodesNotAtBdy) & ismember(edgeEnd,nodesAtBdy);
     edgeRates(acceleratedEdges) = edgeRates(acceleratedEdges)*delta;
+    
+    slowedEdges = ismember(edgeStart,nodesAtBdy) & ismember(edgeEnd,nodesNotAtBdy);
+    edgeRates(slowedEdges) = edgeRates(slowedEdges)/delta;
 end
 %% set up P
 
