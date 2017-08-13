@@ -1,10 +1,13 @@
-function fh = plotGraph_lattice(ghParams,ghInput,plotEdges,plotObs)
+function fh = plotGraph_lattice(ghParams,ghInput,plotEdges,plotObs,plotRates)
 
 if nargin < 3 || isempty(plotEdges)
     plotEdges = 1;
 end
 if nargin < 4 || isempty(plotObs)
     plotObs = 1;
+end
+if nargin < 5 || isempty(plotRates)
+    plotRates = 1;
 end
 
 nodes = ghInput.nodes;
@@ -16,6 +19,7 @@ dim = ghParams.dim;
 geometry = ghParams.geometry;
 obRad = ghParams.R;
 maxHeadSize = max(sqrt(sum(edgeJumps.^2,2)));
+ctr = ghParams.ctr;
 
 fh = figure;
 hold on
@@ -24,13 +28,13 @@ if dim == 2
     
     if plotObs
 
-        cornerX = .5 - obRad;
-        cornerY = .5 - obRad;
+        cornerX = ctr - obRad;
+        cornerY = ctr - obRad;
         pos = [cornerX cornerY 2*obRad 2*obRad];
         
         if strcmpi(geometry,'circle')
             curvature = [1 1];
-        elseif strcmpi(geometry,'square') || strcmpi(geometry,'squareSlowdown') || strcmpi(geometry,'squareBonding')  || strcmpi(geometry,'squareBdyAttract') || strcmpi(geometry,'squareBdyRepel')
+        elseif strcmpi(geometry(1:6),'square')
             curvature = [0 0];
         end
         
@@ -76,7 +80,7 @@ elseif dim == 3
 end
 
 % only label jumps in 2d
-if dim == 2
+if dim == 2 && plotRates
     for i = 1:size(edges,1)
         edge = edges(i,:);
         rate = edgeRates(i);
