@@ -4,8 +4,7 @@
 %   3) attraction at boundary
 %   4) repulsion at boundary
 
-%error('not working with these settings m = 6 rho = .25')
-saveOn = 1;
+saveOn = 0;
 rho = .5;
 m = 8;
 h = 1/m;
@@ -161,15 +160,20 @@ end
 if plotOn
     fh = figure;
     bh = bar([results_regular.Deff,results_bonding.Deff,results_bdyRepel.Deff,results_bdyAttract.Deff]);
+    text(bh.XData,bh.YData',num2str(bh.YData','%0.2f'),...
+        'HorizontalAlignment','center',...
+        'VerticalAlignment','bottom')
     ca = gca;
     ca.XTickLabel = {'Simple','Bonding','Repulsion','Attraction'};
     ylabel('D_e')
     ca = gca;
     ca.FontSize = 18;
-
+    
     %dirName = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
     %filename = 'driftEffectsDeff';
     %mySaveFig([dirName 'driftEffectsDeff'],fh,'fig')
     %mySaveFig([dirName 'driftEffectsDeff'],fh,'png')
     %mySaveFig([dirName 'driftEffectsDeff'],fh,'eps')
+
 end
+
