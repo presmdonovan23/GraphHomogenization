@@ -54,9 +54,10 @@ axis([-.25 1.25 -.25 1.25]);
 axis off
 
 if saveOn
-    filename = ['setting_' geometry '_rho' num2str(round(100*rho))];
-    mysavefig(filename, fh, 'fig' );
-    mysavefig(filename, fh, 'png' );
+    filename = [geometry '_rho' num2str(round(100*rho)) '_m' num2str(m)];
+    mySaveFig(filename, fh, 'fig' );
+    mySaveFig(filename, fh, 'png' );
+    mySaveFig(filename, fh, 'eps' );
 end
 
 end
