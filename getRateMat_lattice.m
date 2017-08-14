@@ -131,6 +131,47 @@ elseif strcmpi(ghParams.geometry,'squareBdyAttract')
     
     slowedEdges = ismember(edgeStart,nodesAtBdy) & ismember(edgeEnd,nodesNotAtBdy);
     edgeRates(slowedEdges) = edgeRates(slowedEdges)/delta;
+elseif strcmpi(ghParams.geometry,'squareBdySlow')
+    % Slow all rates from boundary node to boundary node.
+    % Meant to simulate nodes sitting on obstruction boundary.
+    delta = ghParams.rateCoeffs.delta;
+    dist = ghParams.rateCoeffs.dist;
+    h = ghParams.h;
+    trueRho = ghParams.rho + .5*h;
+    relCoords = nodes - ghParams.ctr;
+    nodesAtBdy = all(abs(relCoords) < (ghParams.rho/2 + dist),2);
+    nodesNotAtBdy = ~nodesAtBdy;
+    nodesAtCorner = all(abs(abs(relCoords) - trueRho/2) < 1e-10,2);
+    
+    nodesAtBdy = find(nodesAtBdy);
+    nodesNotAtBdy = find(nodesNotAtBdy);
+    nodesAtCorner = find(nodesAtCorner);
+    
+    acceleratedEdges = ismember(edgeStart,nodesAtBdy) & ismember(edgeEnd,nodesNotAtBdy) & ~ismember(edgeStart,nodesAtCorner);
+    edgeRates(acceleratedEdges) = edgeRates(acceleratedEdges)*delta;
+    
+    % need to do some surgery here because squareBdySlow is using a hack to
+    % work.
+    if ghParams.diagJumps > 0
+        warning('squareBdySlow geometry with diagonal jumps may not work as intended.');
+        validInds = edgeRates > 0;
+        edgeStart = edgeStart(validInds);
+        edgeEnd = edgeEnd(validInds);
+        edgeRates = edgeRates(validInds);
+        edges = [edgeStart,edgeEnd];
+        edgeJumps = nodes(edges(:,2),:) - nodes(edges(:,1),:);
+        inds = abs(edgeJumps) > .5;
+        edgeJumps(inds) = edgeJumps(inds) - sign(edgeJumps(inds));
+
+        diagJumps = ismembertol(abs(edgeJumps),[h,h],1e-10,'byrows',1);
+        bdyJumps = ismember(edges(:,1),nodesAtBdy) & ismember(edges(:,2),nodesAtBdy);
+        edgeRates(diagJumps & bdyJumps) = 0;
+        
+        diagJumpsFromBdy = ismember(edgeStart,nodesAtBdy) & ismember(edgeEnd,nodesNotAtBdy) & diagJumps;
+        edgeRates(diagJumpsFromBdy) = edgeRates(diagJumpsFromBdy)/delta;
+    end
+    %edges(diagJumps,:) = [];
+    %edgeJumps(diagJumps,:) = [];
 end
 %% set up P
 
