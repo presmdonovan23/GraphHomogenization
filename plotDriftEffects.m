@@ -34,7 +34,7 @@ ghParams_bdyAttract = ghParams;
 fh = figure;
 bh = bar([results_regular.Deff,results_bonding.Deff,results_bdyRepel.Deff,results_bdyAttract.Deff]);
 ca = gca;
-ca.XTickLabel = {'Simple','Bonding','Repulsion','Attraction'};
+ca.XTickLabel = {'Neutral','Bonding','Repulsion','Attraction'};
 ylabel('D_e')
 ca = gca;
 ca.FontSize = 18;

@@ -164,7 +164,7 @@ if plotOn
         'HorizontalAlignment','center',...
         'VerticalAlignment','bottom')
     ca = gca;
-    ca.XTickLabel = {'Simple','Bonding','Repulsion','Attraction'};
+    ca.XTickLabel = {'Neutral','Bonding','Repulsion','Attraction'};
     ylabel('D_e')
     ca = gca;
     ca.FontSize = 18;
