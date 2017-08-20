@@ -1,22 +1,23 @@
 
-saveOn = 1;
+saveOn = 0;
 
 rhoVals = .5;
-mVals = 2.^[2,4,8];
+mVals = 2.^[12];
 %deltaVals = [1 .9 .5 .25 .1 .05 .01 .001 .0001]; % squareSlowdown slowdown coeff
-
+ctr = .5;
 dim = 2;
-geometry = 'square';
+geometry = 'circle';
 
-diagJumps = 2; % diagJumps = 2 => corrected diagonal jumps
+diagJumps = 0; % diagJumps = 2 => corrected diagonal jumps
 D0 = 1;
-alpha = 0;
 
+alpha = 1;
 K1 = 25;
 K2 = 10;
+delta = 1.5;
 
 startNodeInd = 1;
-numTraj = 10000;
+numTraj = 0;
 plotOn = 0;
 rate = []; % field is current obsolete
 
@@ -25,15 +26,14 @@ idx = 1;
 for m = mVals
     for rho = rhoVals
         %for delta = deltaVals
-
+            h = 1/m;
+            
             rateCoeffs.alpha = alpha;
             rateCoeffs.K1 = 25;
             rateCoeffs.K2 = 10;
-            %rateCoeffs.delta = delta;
+            rateCoeffs.delta = delta;
 
-            h = 1/m;
-
-            ghParams(idx) = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps);
+            ghParams(idx) = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps,ctr);
             ghInput(idx) = GraphHomogInput(ghParams(idx));
 
             results_homog(idx) = getDeff_homog(ghInput(idx));
