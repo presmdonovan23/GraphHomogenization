@@ -110,7 +110,7 @@ Deff_obsBdy = [results_obsBdy.Deff];
 Deff_obsBdy_diag = [results_obsBdy_diag.Deff];
 
 figure
-%{
+
 subplot(1,3,1)
 hold on
 errorbar(pathLen_cont,Deff_cont,...
@@ -142,8 +142,8 @@ xlabel('1 / mean path length')
 ylabel('Deff')
 ca = gca;
 ca.FontSize = 18;
-%}
-%subplot(1,3,3)
+
+subplot(1,3,3)
 hold on
 errorbar(log2(1./pathLen_cont),Deff_cont,...
     .5*(CIhigh - CIlow),'.-','markersize',15);
@@ -154,8 +154,89 @@ plot(log2(1./pathLen_obsBdy),Deff_obsBdy,'.-','markersize',15);
 plot(log2(1./pathLen_obsBdy_diag),Deff_obsBdy_diag,'.-','markersize',15);
 
 lh = legend('Continuous','Discrete','Discrete Diag Jumps','Discrete Diag Jumps (corrected)','Discrete Obs on Bdy','Discrete Obs on Bdy Diag Jumps','location','southeast');
-xlabel('log(1 / mean path length)')
+xlabel('log_2(1 / mean path length)')
 ylabel('Deff')
 ca = gca;
 ca.FontSize = 18;
 ca.XLim(1) = 1;
+
+%% Publication: Continuous vs discrete vs discrete w/ diag corrected
+saveOn = 1;
+
+dirname = '/Users/prestondonovan/Documents/School/Research/MATLAB Code/Discrete Homogenization/GraphHomogenization/';
+load('/Users/prestondonovan/Documents/School/Research/MATLAB Code/Data Processing/Simulation_2d/FixedPathLength/results.mat');
+results_cont = results;
+sim_spec = [results_cont.sim_spec];
+
+load([dirname 'results/results_2d_square_2017_07_19_09_37_30.mat']);
+results_discrete = results_homog;
+ghParams_discrete = ghParams;
+%ghInput_discrete = ghInput;
+
+load([dirname 'Results_2d_square_diagJumpsCorrected/results_2017_08_13_18_38_51.mat']);
+results_discrete_diagC = results_homog;
+ghParams_discrete_diagC = ghParams;
+ghInput_discrete_diagC = ghInput;
+
+pathLen_cont = [sim_spec.path_len];
+pathLen_disc = 1./[ghParams_discrete.m];
+pathLen_disc_diagC = (.5*(sqrt(2) + 1))./[ghParams_discrete_diagC.m];
+
+CI = [results_cont.Deff95CI];
+CIlow = CI(1:2:end);
+CIhigh = CI(2:2:end);
+Deff_cont = [results_cont.Deff];
+Deff_disc = [results_discrete.Deff];
+Deff_disc_diagC = [results_discrete_diagC.Deff];
+
+fh = figure;
+
+subplot(1,3,1)
+hold on
+errorbar(pathLen_cont,Deff_cont,...
+    .5*(CIhigh - CIlow),'.-','markersize',15);
+plot(pathLen_disc,Deff_disc,'.-','markersize',15);
+plot(pathLen_disc_diagC,Deff_disc_diagC,'.-','markersize',15);
+
+lh = legend('Continuous','Discrete','Discrete Diag Jumps','location','southeast');
+xlabel('mean path length')
+ylabel('Deff')
+ca = gca;
+ca.FontSize = 18;
+
+subplot(1,3,2)
+hold on
+errorbar(1./pathLen_cont,Deff_cont,...
+    .5*(CIhigh - CIlow),'.-','markersize',15);
+plot(1./pathLen_disc,Deff_disc,'.-','markersize',15);
+plot(1./pathLen_disc_diagC,Deff_disc_diagC,'.-','markersize',15);
+
+lh = legend('Continuous','Discrete','Discrete Diag Jumps','location','southeast');xlabel('1 / mean path length')
+ylabel('Deff')
+ca = gca;
+ca.FontSize = 18;
+
+subplot(1,3,3)
+
+hold on
+errorbar(log2(1./pathLen_cont),Deff_cont,...
+    .5*(CIhigh - CIlow),'.-','markersize',30);
+h = plot(log2(1./pathLen_disc),Deff_disc,'s-','markersize',10);
+set(h, 'MarkerFaceColor', get(h, 'Color'));
+h = plot(log2(1./pathLen_disc_diagC(1:7)),Deff_disc_diagC(1:7),'d-','markersize',10);
+set(h, 'MarkerFaceColor', get(h, 'Color'));
+
+lh = legend('Continuous','Discrete','Discrete w/ diagonal jumps','location','southeast');
+xlabel('log_2(1 / mean path length)')
+ylabel('D_e')
+ca = gca;
+ca.FontSize = 18;
+ca.XLim(1) = 1;
+axis([1.5 8 .66 .78])
+if saveOn
+    dirName = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
+    filename = 'contVsDiscVsDiscdiag';
+    mySaveFig([dirName filename],fh,'fig')
+    mySaveFig([dirName filename],fh,'png')
+    mySaveFig([dirName filename],fh,'eps')
+end
