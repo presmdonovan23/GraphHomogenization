@@ -1,8 +1,12 @@
 function results = getDeff_homog(ghInput)
 
 L = ghInput.L;
+tic;
 [LL,U,P,Q,R] = lu(L');
-LTFactors.L = LL; % extra memeory wont be allocated here
+LUtime = toc;
+fprintf('Calculated LU decomposition in %.1f seconds.\n',LUtime);
+
+LTFactors.L = LL; % extra memory wont be allocated here
 LTFactors.U = U;
 LTFactors.P = P;
 LTFactors.Q = Q;
@@ -21,6 +25,7 @@ results.nodes = ghInput.nodes;
 results.edges = ghInput.edges;
 results.edgeRates = ghInput.edgeRates;
 results.edgeJumps = ghInput.edgeJumps;
+results.LU_time = LUtime;
 results.pi0 = pi0;
 results.pi0_res = pi0_relRes;
 results.pi0_flag = pi0_flag;
