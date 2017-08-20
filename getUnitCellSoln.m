@@ -11,7 +11,7 @@ flag = 1;
 
 if nargin < 5 || isempty(TOL)
     nNodes = size(L,1);
-    TOL = sqrt(eps(1/nNodes));
+    TOL = 1e-8;sqrt(eps(1/nNodes));
 end
 
 solvability = sum(ghInput.edgeJumps.*ghInput.edgeRates.*pi0(ghInput.edges(:,1)),1);
@@ -45,7 +45,7 @@ else
 
     if any(relRes > TOL) || any(~isfinite(omega(:)))
 
-        warning('LU Solver failed. Trying backslash.');
+        warning('LU Solver failed (rel res = %.4e). Trying backslash.', max(relRes));
         omega = L'\RHS;
 
         err = L'*omega - RHS;
@@ -54,11 +54,15 @@ else
         relRes = normErr./normRHS;
 
     end
-
-    if any(relRes > TOL) || any(~isfinite(omega(:)))
-
-        warning('Backslash failed. Perturbing matrix.');
-        omega = (L+eps*rand(size(L)))'\RHS;
+    
+    if any(~isfinite(omega(:)))
+        warning('Solution has non-finite entries. Perturbing L.');
+        
+        perturb = rand(nnz(L),1);
+        inds = L ~= 0;
+        Lperturb = L;
+        Lperturb(inds) = Lperturb(inds) + perturb;
+        omega = (Lperturb)'\RHS;
 
         err = L'*omega - RHS;
         normErr = sqrt(sum(err.^2,1));

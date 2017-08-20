@@ -5,7 +5,7 @@ tic
 
 nNodes = size(L,1);
 if nargin < 3
-    TOL = sqrt(eps(1/nNodes));
+    TOL = 1e-8;%sqrt(eps(1/nNodes));
 end
 
 flag = 1;
@@ -31,8 +31,8 @@ relRes = norm(L'*pi0)/norm(pi0);
 
 if relRes > TOL || any(~isfinite(pi0))
     
-    warning('LU Solver failed. Trying eigs.');
-    [pi0,~] = eigs(L',1,.01);
+    warning('Power method failed (rel res = %.4e). Trying eigs.',relRes);
+    [pi0,~] = eigs(L',1,0);
     
     pi0 = pi0./sum(pi0);
     relRes = norm(L'*pi0)/norm(pi0);
@@ -44,7 +44,7 @@ warning('on', MSGID2)
 
 if relRes > TOL
     flag = 2;
-    warning('Error exceeds tolerance (|L^T * pi0| = %.10f.',relRes)
+    warning('Error exceeds tolerance (rel res = %.4e).',relRes)
 end
 
 time = toc;
