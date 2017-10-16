@@ -1,4 +1,4 @@
-function [ghInput, results_homog, results_mc] = getDeff_whirlpool(ghParams,numTraj,removeEdges,rateReduction,plotOn,plotLambda,plotNodeLabels)
+function [ghInput] = getDeff_whirlpool(ghInput,removeEdges,rateReduction,plotOn,plotLambda,plotNodeLabels)
 % the purpose of this driver is to find a setting that satisfies unit-cell
 % solvability but not detailed balance.
 % we set up a simple setting with m = 3 and remove some edges to create a
@@ -6,26 +6,13 @@ function [ghInput, results_homog, results_mc] = getDeff_whirlpool(ghParams,numTr
 % equivalently, e' is removed for some edges). we could also try making
 % some rates very low if this creates issues.
 
-if nargin < 6 || isempty(plotLambda)
-    plotLambda = 1;
-end
-if nargin < 7 || isempty(plotNodeLabels)
-    plotNodeLabels = 1;
-end
-for i = 1:8
-    startNodeInd(1 + (i-1)*numTraj:i*numTraj) = i;
-end
-
-ghInput = GraphHomogInput(ghParams);
-
 %% modified ghInput
 L = ghInput.L;
-m = ghParams.m;
 
-leftJumps = ismembertol(ghInput.edgeJumps,[-1/m,0],1e-10,'byrows',true);
-rightJumps = ismembertol(ghInput.edgeJumps,[1/m,0],1e-10,'byrows',true);
-downJumps = ismembertol(ghInput.edgeJumps,[0,-1/m],1e-10,'byrows',true);
-upJumps = ismembertol(ghInput.edgeJumps,[0,1/m],1e-10,'byrows',true);
+leftJumps = ismembertol(ghInput.edgeJumps,[-1/3,0],1e-10,'byrows',true);
+rightJumps = ismembertol(ghInput.edgeJumps,[1/3,0],1e-10,'byrows',true);
+downJumps = ismembertol(ghInput.edgeJumps,[0,-1/3],1e-10,'byrows',true);
+upJumps = ismembertol(ghInput.edgeJumps,[0,1/3],1e-10,'byrows',true);
 
 edgeStartNodes = ghInput.nodes(ghInput.edges(:,1),:);
 edgeEndNodes = ghInput.nodes(ghInput.edges(:,2),:);
@@ -70,159 +57,5 @@ L = L*s;
 
 ghInput.L = L;
 ghInput.edgeRates = ghInput.edgeRates*s;
-%% get results
-results_homog = getDeff_homog(ghInput);
-results_mc = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn );
-%% check detailed balance
-nNodes  = size(ghInput.nodes,1);
-nEdges = size(ghInput.edges,1);
-g = rand(nNodes,1);
-f = rand(nNodes,1);
-
-rates = ghInput.edgeRates;
-L = ghInput.L;
-pi0 = results_homog.pi0;
-pi0Start = pi0(ghInput.edges(:,1));
-pi0End = pi0(ghInput.edges(:,2));
-
-term = 0;
-ratesPrime = zeros(nEdges,1);
-for i = 1:nEdges
-    % check L = L^T wrt pi
-    edgeStart = ghInput.edges(i,1);
-    edgeEnd = ghInput.edges(i,2);
-    term = term + (g(edgeEnd)*f(edgeStart) - f(edgeEnd)*g(edgeStart))*rates(i)*pi0(edgeStart);
-    
-    % check other thing
-    ratesPrime(i) = full(L(edgeEnd,edgeStart));
-    term2(i) = (g(edgeEnd)*f(edgeStart) - f(edgeEnd)*g(edgeStart))*rates(i)*pi0(edgeStart) + ...
-        (g(edgeStart)*f(edgeEnd) - f(edgeStart)*g(edgeEnd))*ratesPrime(i)*pi0(edgeEnd);
-    
-end
-
-fprintf('\n');
-fprintf('Unit cell solvability: %.10f.\n',sum(abs(results_homog.unitCell_solvability)));
-
-if sum(abs(term)) < 1e-10
-    fprintf('L = L^T wrt pi is satisfied (%.10f).\n',sum(abs(term)));
-else
-    fprintf('L = L^T wrt pi is not satisfied (%.10f).\n',sum(abs(term)));
-end
-% check detailed balance
-detailedBalance = results_homog.pi0(ghInput.edges(:,1)).*ghInput.edgeRates - results_homog.pi0(ghInput.edges(:,2)).*ratesPrime;
-if sum(abs(detailedBalance)) < 1e-10
-    fprintf('Detailed balance is satisfied (%.10f).\n',sum(abs(detailedBalance)));
-else
-    fprintf('Detailed balance is not satisfied (%.10f).\n',sum(abs(detailedBalance)));
-end
-
-%% plot
-if plotOn
-    plotEdges = 1;
-    plotObs = 0;
-
-    nodes = ghInput.nodes;
-    edges = ghInput.edges;
-    edgeRates = ghInput.edgeRates;
-    edgeJumps = ghInput.edgeJumps;
-
-    dim = ghParams.dim;
-    geometry = ghParams.geometry;
-    obRad = ghParams.R;
-    maxHeadSize = .35*max(sqrt(sum(edgeJumps.^2,2)));
-
-    fh = figure;
-    hold on
-
-    plot(nodes(:,1),nodes(:,2),'b.','markersize',50);
-
-    for i = 1:size(nodes,1)
-        s = sprintf('y_%d',i);
-        text(nodes(i,1) - .09,nodes(i,2) - .06,s,'fontsize',20);
-    end
-    if plotEdges
-        quiver( nodes(edges(:,1),1),nodes(edges(:,1),2),...
-                edgeJumps(:,1),edgeJumps(:,2),...
-                'color','black',...
-                'autoscale','off',...
-                'MaxHeadSize',maxHeadSize,...
-                'linewidth',3);
-    end
-    if plotObs
-
-        cornerX = .5 - obRad;
-        cornerY = .5 - obRad;
-        pos = [cornerX cornerY 2*obRad 2*obRad];
-
-        if strcmpi(geometry,'circle')
-            curvature = [1 1];
-        elseif strcmpi(geometry,'square')
-            curvature = [0 0];
-        end
-
-        rectangle(  'Position', pos,...
-                    'facecolor','red',...
-                    'Curvature',curvature);
-
-    end
-
-
-    for i = 1:size(edges,1)
-        edge = edges(i,:);
-        rate = edgeRates(i);
-        jump = edgeJumps(i,:);
-
-        % plot rates as text
-        textloc = nodes(edge(1),:) + .5*jump;
-        %rateStr = sprintf('%d',round(rate));%num2str(rate,'%.2f')
-        if plotLambda
-            rateStr = '$\bar{\lambda}$';
-        else
-            rateStr = '';
-        end
-        if jump(1) > 10e-6 %edge goes left to right
-            textloc(2) = textloc(2) + norm(jump)/10;
-
-            h = text(textloc(1),textloc(2),rateStr,...
-                'horizontalalignment','center',...
-                'fontsize',30,...
-                'interpreter','latex');
-
-        elseif jump(1) < -10e-6 %edge goes right to left
-            textloc(2) = textloc(2) + norm(jump)/10;
-
-            h = text(textloc(1),textloc(2),rateStr,...
-                'horizontalalignment','center',...
-                'fontsize',30,...
-                'interpreter','latex');
-
-            %set(h, 'rotation', 180)
-        elseif jump(2) > 10e-6 %edge goes bottom to top
-            textloc(1) = textloc(1) + norm(jump)/10;
-
-            h = text(textloc(1),textloc(2),rateStr,...
-                'horizontalalignment','center',...
-                'fontsize',30,...
-                'interpreter','latex');
-
-            %set(h, 'rotation', 90)
-        elseif jump(2) < -10e-6 %edge goes top to bottom
-            textloc(1) = textloc(1) + norm(jump)/10;
-
-            h = text(textloc(1),textloc(2),rateStr,...
-                'horizontalalignment','center',...
-                'fontsize',30,...
-                'interpreter','latex');
-
-            %set(h, 'rotation', 270)
-        end
-    end
-
-    lh = legend('Nodes','Edges','location','southeast');
-    set(lh,'fontsize',18);
-    axis square
-    axis off
-    rectangle('position',[0 0 1 1],'linewidth',1)
-    %mySaveFig('detailedBalance',fh);
 
 end

@@ -14,18 +14,33 @@ D0 = 1;
 alpha = 0;
 K1 = 25;
 K2 = 10;
-rate = []; % field is current obsolete
+rate = [];
 rateCoeffs.alpha = alpha;
 rateCoeffs.K1 = 25;
 rateCoeffs.K2 = 10;
 
 ghParams = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps);
 
-[ghInput, results_homog, results_mc] = getDeff_whirlpool(ghParams,numTraj,removeEdges,rateReduction,plotOn,plotLambda,plotNodeLabels);
+ghInput = GraphHomogInput(ghParams);
+ghInput = getDeff_whirlpool(ghInput,removeEdges,rateReduction,plotOn,plotLambda,plotNodeLabels);
+
+results_homog = getDeff_homog(ghInput);
+
+for i = 1:8
+    startNodeInd(1 + (i-1)*numTraj:i*numTraj) = i;
+end
+results_mc = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn );
 
 dirname = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
 
-fh = gcf;
-mySaveFig([dirname 'detailedBalance2'],fh,'fig')
-mySaveFig([dirname 'detailedBalance2'],fh,'png')
-mySaveFig([dirname 'detailedBalance2'],fh,'eps')
+if plotOn
+    
+    plotEdges = 1;
+    plotObs = 0;
+    fh = drawWhirlpoolSetting( ghParams, ghInput, plotEdges, plotObs );
+
+    %mySaveFig([dirname 'detailedBalance2'],fh,'fig')
+    %mySaveFig([dirname 'detailedBalance2'],fh,'png')
+    %mySaveFig([dirname 'detailedBalance2'],fh,'eps')
+    
+end
