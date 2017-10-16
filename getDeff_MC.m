@@ -164,6 +164,36 @@ loc(:,2:end) = cumsum(edgeJumps_traj,1)' + startNode';
 
 end
 
+
+function [Deff, DeffVar, CI_high, CI_low] = getDeff(t,sd)
+
+[N, T] = size(sd);
+
+Ybar = mean(sd,2);
+alpha = t./sum(t.^2);
+slope = alpha*Ybar;
+
+covYbar = zeros(T,T);
+
+for i = 1:T
+    for j = 1:T
+        Yi = sd(:,i);
+        Yj = sd(:,j);
+        Yibar = mean(Yi);
+        Yjbar = mean(Yj);
+        
+        covYbar(i,j) = (1/N)*(1/N*sum(Yi.*Yj)-Yibar*Yjbar);
+    end
+end
+
+%varslope = alpha*covYbar*alpha';
+
+Deff = slope/(2*d*t(end));
+DeffVar = alpha*covYbar*alpha'/((2*d*t(end))^2);
+CI_low = Deff - 1.96*sqrt(DeffVar);
+CI_high = Deff + 1.96*sqrt(DeffVar);
+end
+
 %{
 function [Deff, CI_high CI_low] = getDeff(t,sd)
 
