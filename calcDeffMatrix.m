@@ -1,4 +1,18 @@
 function [Deff, term1, term2] = calcDeffMatrix( edges, edgeRates, edgeJumps, pi0, unitCell_soln )
+% Computes effective diffusivity matrix given necessary ingredients
+% Inputs:
+%   1) edges = an e x 2 array where e = number of edges in the quotient
+%   edge set. edges(i,1) = starting node index of the ith edge.
+%   edges(i,2) = ending node index of the ith edge.
+%   2) edgeRates = an e x 1 array where edgeRates(i) = jump rate of the
+%   ith edge.
+%   3) edgeJumps = an e x d array where edgeJumps(i) = the jump of the
+%   ith edge. Equivalently, edgeJumps(i) = nodes(edges(i,2),:) -
+%   nodes(edges(i,1),:).
+%   4) pi0 = s x 1 array where pi0(i) = stationary distribution value at
+%   ith node
+%   5) unitCell_soln = s x 1 array where unitCell_soln(i) = unit-cell
+%   solution at ith node
 
 tic
 dim = size(edgeJumps,2);

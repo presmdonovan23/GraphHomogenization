@@ -1,4 +1,4 @@
-function results = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn )
+function results = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn, negateSteps )
 
 if nargin < 2 || isempty(numTraj)
     numTraj = 1000;
@@ -9,7 +9,15 @@ end
 if nargin < 4 || isempty(plotOn)
     plotOn = 0;
 end
+if nargin < 5 || isempty(negateSteps)
+    negateSteps = 0;
+end
 
+if size(ghInput.nodes,1) > 4 && negateSteps
+    warning('negateSteps should only be 1 if m = 2.');
+elseif size(ghInput.nodes,1) <= 4 && ~negateSteps
+    warning('It appears that m = 2 and negateSteps = 0. Results may be inaccurate if m = 2.')
+end
 
 if numTraj == 0
     results.Deff = [];
@@ -158,6 +166,13 @@ edges_traj(:,2) = node';
 time = time(1:stepNum);
 
 edgeJumps_traj = edgeJumps(edgeInds_traj,:);
+
+% Only use if m = 2
+if negateSteps
+    stepsToNegate = rand(stepNum-1,1) < .5;
+    edgeJumps_traj(stepsToNegate,:) = -edgeJumps_traj(stepsToNegate,:);
+end
+
 loc = zeros(dim,stepNum);
 loc(:,1) = startNode;
 loc(:,2:end) = cumsum(edgeJumps_traj,1)' + startNode';

@@ -31,6 +31,8 @@ classdef GraphHomogParams_lattice
     %       repulsion, -1 = attraction
     %       .K1 = K1 coefficient for drift
     %       .K2 = K2 coefficient for drift
+    %   2) specialSetting_m2 (string) = 'none', 'blockOneSite', or
+    %   'slowOneSite'
     properties
         
         dim
@@ -42,12 +44,24 @@ classdef GraphHomogParams_lattice
         rateCoeffs
         diagJumps % dont need to supply, default is 0
         ctr
+        specialSetting_m2
         
     end
         
     properties (Dependent)
         R
         h
+    end
+    
+    properties (Access = private)
+        validSpecialSettings = {'none','blockOneSite','slowOneSite'};
+        validGeometries = {'circle',... 
+                           'circleSlowdown',...
+                           'square',...
+                           'squareBonding',...
+                           'squareBdyRepel',...
+                           'squareBdyAttract',...
+                           'squareBdySlow'};
     end
     
     methods
@@ -66,6 +80,11 @@ classdef GraphHomogParams_lattice
                 rateCoeffs = p.rateCoeffs;
                 diagJumps = p.diagJumps;
                 ctr = p.ctr;
+                if isfield('specialSetting_m2',p)
+                    specialSetting_m2 = p.specialSetting_m2;
+                else
+                    specialSetting_m2 = 'none';
+                end
                 
             else
                 
@@ -82,7 +101,17 @@ classdef GraphHomogParams_lattice
                 else
                     ctr = varargin{9};
                 end
-                
+                if nargin < 10 || isempty(varargin{10})
+                    specialSetting_m2 = 'none';
+                else
+                    specialSetting_m2 = varargin{10};
+                end
+            end
+            
+            if (m ~= 2 || dim ~= 2) && ~strcmpi(specialSetting_m2,'none')
+                error('Can only specify specialSetting_m2 when dim = 2 and m = 2.')
+            elseif m == 2 && dim == 2 && ~ismember(specialSetting_m2,obj.validSpecialSettings)
+                error('Invalid specialSetting_m2.')
             end
             
             obj.dim = dim;
@@ -94,6 +123,7 @@ classdef GraphHomogParams_lattice
             obj.rateCoeffs = rateCoeffs;
             obj.diagJumps = diagJumps;
             obj.ctr = ctr;
+            obj.specialSetting_m2 = specialSetting_m2;
             
         end
         
