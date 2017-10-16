@@ -1,4 +1,4 @@
-function [L,nodes,edges,edgeRates,edgeJumps,nodeInds] = latticeSetup(ghParams)
+function [L,nodes,edges,edgeRates,edgeJumps] = latticeSetup(ghParams)
 
 m =         ghParams.m;
 dim =       ghParams.dim;

@@ -42,4 +42,3 @@ results.Deff_term2 = DeffTerm2;
 results.Deff = Deff(1);
 
 end
-
