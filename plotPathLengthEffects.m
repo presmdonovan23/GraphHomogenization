@@ -16,7 +16,7 @@ axis([1 9 .66 .78]);
 axis square
 
 xlabel('Path Length (h)');
-ylabel('D_e^h');
+ylabel('D_e');
 
 lh = legend('Continuous Homogenization','Graph Homogenization','location','southeast');
 
@@ -29,9 +29,9 @@ end
 
 dirname = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
 
-%mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'fig')
-%mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'png')
-%mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'eps')
+mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'fig')
+mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'png')
+mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'eps')
 
 %% Plot graph setting w/ square in upper right corner (m = 2,4,8,16)
 fh = figure;
@@ -190,7 +190,7 @@ Deff_disc = [results_discrete.Deff];
 Deff_disc_diagC = [results_discrete_diagC.Deff];
 
 fh = figure;
-
+%{
 subplot(1,3,1)
 hold on
 errorbar(pathLen_cont,Deff_cont,...
@@ -217,7 +217,7 @@ ca = gca;
 ca.FontSize = 18;
 
 subplot(1,3,3)
-
+%}
 hold on
 errorbar(log2(1./pathLen_cont),Deff_cont,...
     .5*(CIhigh - CIlow),'.-','markersize',30);
@@ -227,14 +227,16 @@ h = plot(log2(1./pathLen_disc_diagC(1:7)),Deff_disc_diagC(1:7),'d-','markersize'
 set(h, 'MarkerFaceColor', get(h, 'Color'));
 
 lh = legend('Continuous','Discrete','Discrete w/ diagonal jumps','location','southeast');
-xlabel('log_2(1 / mean path length)')
+xlabel('Mean path length')
 ylabel('D_e')
 ca = gca;
 ca.FontSize = 18;
 ca.XLim(1) = 1;
+ca.XTickLabel = {'2^{-2}','2^{-3}','2^{-4}','2^{-5}','2^{-6}','2^{-7}','2^{-8}'};
 axis([1.5 8 .66 .78])
 if saveOn
-    dirName = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
+    %dirName = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
+    dirName = '/Users/prestondonovan/Documents/School/Research/Thesis/includes/chapter2/';
     filename = 'contVsDiscVsDiscdiag';
     mySaveFig([dirName filename],fh,'fig')
     mySaveFig([dirName filename],fh,'png')
