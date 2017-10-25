@@ -1,12 +1,13 @@
 
 saveOn = 0;
+plotOn = 1;
 
 % geometry parameters
 dim = 2;
 geometryName = 'square';
 D0 = 1;
 rhoVals = [.25 .5 .75];
-mVals = 2.^[3];
+mVals = 2.^[3 4];
 diagJumps = 2; % diagJumps = 2 => corrected diagonal jumps
 ctr = .5;
 specialSetting_m2 = 'none';
@@ -27,9 +28,11 @@ rateCoeffs.K1 = 25;
 rateCoeffs.K2 = 10;
 rateCoeffs.delta = delta;
 
-idx = 1;
-for m = mVals
-    for rho = rhoVals
+clear results;
+for i = 1:length(mVals)
+    m = mVals(i);
+    for j = 1:length(rhoVals)
+        rho = rhoVals(j);
         
         geometry.dim = dim;
         geometry.name = geometryName;
@@ -44,9 +47,17 @@ for m = mVals
 
         curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,numTraj,startNodeInd,geometry);
         
-        results(idx) = curRes;
-        idx = idx+1;
+        results(i,j) = curRes;
+        
+    end
     
+end
+
+if plotOn
+    for i = 1:length(mVals)
+    
+        plotRhoVsEffDiff(results(i,:));
+        
     end
 end
 
