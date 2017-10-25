@@ -1,16 +1,8 @@
-function val = rate_lattice(x,y,ghParams)
+function [val,mu] = rate_lattice(x,y,dim,geometry,D0,R,h,alpha,diagJumps,K1,K2)
 % Note that x = edge start and y = x + nu. This method will not work
 % correctly if y - x != nu. E.g., [.1,.1] and [.1,.9].
 % You can assume the edge (x,y) exists and has a positive rate. This is
 % taken care of in the parent function, getRateMat_lattice.
-geometry = ghParams.geometry;
-D0 = ghParams.D0;
-h = ghParams.h;
-nNodes = size(x,1);
-alpha = ghParams.rateCoeffs.alpha;
-diagJumps = ghParams.diagJumps;
-K1 = ghParams.rateCoeffs.K1;
-K2 = ghParams.rateCoeffs.K2;
 
 if alpha ~= 0 && (diagJumps >= 1 || strcmpi(geometry,'square'))
     error('Drift not yet implemented for diagonal jumps or square obstructions.')
@@ -22,29 +14,33 @@ else
     lambda = D0/(3*h^2);
 end
 
+nNodes = size(x,1);
+
 if alpha == 0
     val = lambda*ones(nNodes,1);
     
-    if ghParams.diagJumps == 2 && strcmpi(geometry,'square') && ghParams.dim == 2
-        val = correctDiag(val,lambda,x,y,ghParams);
-    elseif ghParams.diagJumps == 2
+    if diagJumps == 2 && strcmpi(geometry,'square') && dim == 2
+        S = R*2;
+        val = correctDiag(val,lambda,x,y,h,S);
+    elseif diagJumps == 2
         error('Corrected diagonal jumps only implemented for 2d square with no drift.');
     end
 else % no diagonal jumps. all jumps along basis vectors
     
     ctr = .5;
-    R = ghParams.R;
     
     jump = (abs(y - x) > 1e-12).*sign(y - x); % only 1 component will be nonzero
-    mu = drift(x);
+    mu = drift(x,ctr,R,K1,K2);
     
     d = sum(jump.*mu,2);  % contains the x,y, or z component of drift
     
-    %val = lambda + alpha*d/(2*h);
-    val = lambda*exp(alpha*2*h*d);
+    val = lambda + alpha*d/(2*h);
+    %val = lambda*exp(alpha*2*h*d);
 end
 
-function val = drift(x)
+end
+
+function val = drift(x,ctr,R,K1,K2)
 % only makes sense for circular obstuctions
 
 relX = x - ctr;
@@ -58,13 +54,11 @@ val(~isfinite(val)) = 0;
 
 end
 
-end
-
-function val = correctDiag(val,lambda,x,y,ghParams)
-    h = ghParams.h;
+function val = correctDiag(val,lambda,x,y,h,S)
+    
     TOL = 1e-10;
     nu = (1/h)*(y-x);
-    S = ghParams.R*2;
+    
     isBlocked = @(site) (abs(site(:,1) - .5) < S/2) & (abs(site(:,2) - .5) < S/2);
 
     % technically this returns true if obstructed.

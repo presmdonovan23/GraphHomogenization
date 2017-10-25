@@ -1,22 +1,15 @@
-function fh = drawWhirlpoolSetting( ghParams, ghInput, plotEdges, plotObs, plotLambda )
+function fh = drawWhirlpoolSetting( nodes,edges,edgeRates,edgeJumps,geometry,obRad, plotEdges, plotObs, plotLambda )
 
-if nargin < 3 || isempty(plotEdges)
+if nargin < 7 || isempty(plotEdges)
     plotEdges = 1;
 end
-if nargin < 4 || isempty(plotObs)
+if nargin < 8 || isempty(plotObs)
     plotObs = 0;
 end
-if nargin < 5 || isempty(plotLambda)
+if nargin < 9 || isempty(plotLambda)
     plotLambda = 0;
 end
 
-nodes = ghInput.nodes;
-edges = ghInput.edges;
-edgeRates = ghInput.edgeRates;
-edgeJumps = ghInput.edgeJumps;
-
-geometry = ghParams.geometry;
-obRad = ghParams.R;
 maxHeadSize = .35*max(sqrt(sum(edgeJumps.^2,2)));
 
 fh = figure;

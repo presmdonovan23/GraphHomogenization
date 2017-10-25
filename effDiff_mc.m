@@ -1,38 +1,40 @@
-function results = getDeff_MC( ghInput, numTraj, startNodeInd, plotOn, negateSteps )
+function results = effDiff_mc(L, nodes, edges, edgeJumps, numTraj, startNodeInd, plotOn, negateSteps )
 
-if nargin < 2 || isempty(numTraj)
+if nargin < 5 || isempty(numTraj)
     numTraj = 1000;
 end
-if nargin < 3 || isempty(startNodeInd)
+if nargin < 6 || isempty(startNodeInd)
     startNodeInd = 1;
 end
-if nargin < 4 || isempty(plotOn)
+if nargin < 7 || isempty(plotOn)
     plotOn = 0;
 end
-if nargin < 5 || isempty(negateSteps)
+if nargin < 8 || isempty(negateSteps)
     negateSteps = 0;
 end
 
-if size(ghInput.nodes,1) > 4 && negateSteps
+if size(nodes,1) > 4 && negateSteps
     warning('negateSteps should only be 1 if m = 2.');
-elseif size(ghInput.nodes,1) <= 4 && ~negateSteps
+elseif size(nodes,1) <= 4 && ~negateSteps
     warning('It appears that m = 2 and negateSteps = 0. Results may be inaccurate if m = 2.')
 end
-
+    
 if numTraj == 0
-    results.Deff = [];
-    results.Deff_var = [];
-    results.Deff_95CI = [];
-    results.numTraj = [];
+    mc.Deff = [];
+    mc.Deff_var = [];
+    mc.Deff_95CI = [];
+    mc.Deff_all = [];
+    mc.Deff_var_all = [];
+    mc.numTraj = numTraj;
+    mc.timeRec = [];
+    mc.trajectoryPos = [];
+    mc.startNodeInd = [];
+
+    results.mc = mc;
     return;
 end
 
 tic
-
-L = ghInput.L;
-edges = ghInput.edges;
-edgeJumps = ghInput.edgeJumps;
-nodes = ghInput.nodes;
 
 if mod(numTraj,100) ~= 0 && numTraj > 0    
     numTraj = 100*ceil(numTraj/100);
@@ -58,7 +60,7 @@ for p = 1:100
         curStartNode = nodes(curStartNodeInd,:);
         
         [ timeCur, locCur ] = ...
-            trajectory( L, edges, edgeJumps, curStartNode, curStartNodeInd, tmax );
+            trajectory( L, edges, edgeJumps, curStartNode, curStartNodeInd, tmax, negateSteps );
         locInterp(i,:,:) = interp1(timeCur',locCur',timeRec')';
         
     end
@@ -86,16 +88,17 @@ Deff_CI_high = Deff + 1.96*sqrt(DeffVar)/sqrt(numTraj);
 
 time = toc;
 
-results.numTraj = numTraj;
-results.timeRec = timeRec;
-results.trajectoryPos = locInterp;
-results.startNodeInd = startNodeInd;
-results.Deff = Deff;
-results.Deff_all = Deff_all;
-results.Deff_var = DeffVar;
-results.Deff_var_all = DeffVar_all;
-results.Deff_95CI = [Deff_CI_low,Deff_CI_high];
+mc.numTraj = numTraj;
+mc.timeRec = timeRec;
+mc.trajectoryPos = locInterp;
+mc.startNodeInd = startNodeInd;
+mc.Deff = Deff;
+mc.Deff_all = Deff_all;
+mc.Deff_var = DeffVar;
+mc.Deff_var_all = DeffVar_all;
+mc.Deff_95CI = [Deff_CI_low,Deff_CI_high];
 
+results.mc = mc;
 
 if plotOn
     figure
@@ -112,7 +115,7 @@ fprintf('Finished %d Monte Carlo simulations in %.2f seconds.\n',numTraj, time);
 
 end
 
-function [ time, loc ] = trajectory( L, edges, edgeJumps, startNode, startNodeInd, tmax )
+function [ time, loc ] = trajectory( L, edges, edgeJumps, startNode, startNodeInd, tmax, negateSteps )
 % must have length of unit cell = 1
 
 % check if start is valid
@@ -123,6 +126,10 @@ end
 if nargin < 6 || isempty(tmax)
     avgRate = -mean(diag(L));
     tmax = 1000/avgRate;
+end
+
+if nargin < 7 || isempty(negateSteps)
+    negateSteps = 0;
 end
 
 dim = size(edgeJumps,2);

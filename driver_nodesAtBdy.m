@@ -1,18 +1,22 @@
 % runs square obstruction with
 
-saveOn = 1;
-plotOn = 0;
+saveOn = 0;
+plotOn = 1;
 rho = .5;
-mVals = 2.^[2:9];
-geometry = 'squareBdySlow';
+mVals = 2.^[2];%2.^[2:9];
+geometryName = 'squareBdySlow';
 delta = 2;
 dim = 2;
 D0 = 1;
+
+numTraj = 0;
+startNodeInd = [];
 
 rate = [];
 
 %% no diag jumps
 diagJumps = 0; % diagJumps = 2 => corrected diagonal jumps
+
 i = 1;
 for m = mVals
     h = 1/m;
@@ -27,36 +31,32 @@ for m = mVals
     %ctr = .5 - .5*h;
     rhoCorrected = rho - .5*h;
 
-    ghParams(i) = GraphHomogParams_lattice(dim,geometry,D0,rhoCorrected,m,rate,rateCoeffs,diagJumps,ctr);
-    ghInput(i) = GraphHomogInput(ghParams(i));
-    ghParams(i).rho = rho;
+    geometry.dim = dim;
+    geometry.name = geometryName;
+    geometry.m = m;
+    geometry.rho = rhoCorrected;
+    geometry.diagJumps = diagJumps;
+    geometry.ctr = ctr;
+    geometry.specialSetting_m2 = [];
+    geometry.rateCoeffs = rateCoeffs;
 
-    results_homog(i) = getDeff_homog(ghInput(i));
-    results_mc = [];
+    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,D0,rhoCorrected,m,rate,rateCoeffs,diagJumps,ctr);
+    results(i) = effDiff(L,nodes,edges,edgeRates,edgeJumps,numTraj,startNodeInd,geometry);
+    
     if plotOn
-        plotGraph_lattice(ghParams(i),ghInput(i));
+        plotEdges = 1;
+        plotObs = 1;
+        plotRates = 0;
+        
+        obRad = rho/2;
+        
+        plotGraph(nodes,edges,edgeRates,edgeJumps,geometry.name,obRad,geometry.ctr,plotEdges,plotObs,plotRates);
     end
     i = i+1;
 end
 
 if saveOn
-    fileName = sprintf('results_%s',myClock(6));
-    
-    dirName = sprintf('Results_%dd_%s',dim,geometry);
-    if diagJumps == 1
-        dirName = [dirName '_diagJumps'];
-    elseif diagJumps == 2
-        dirName = [dirName '_diagJumpsCorrected'];
-    end
-    
-    if ~exist(dirName,'dir')
-        mkdir(dirName);
-    end
-    %filename = sprintf('%s/results_%dd_%s',dirname,dim,geometry);
-    %filenameFull = myClockFilename(filename);
-    filenameFull = [dirName '/' fileName];
-    fprintf('Filename: %s\n',filenameFull);
-    save(filenameFull,'results_homog','results_mc','ghParams','ghInput');
+    saveResults(results);
 end
 
 %% diag jumps
@@ -76,34 +76,30 @@ for m = mVals
     %ctr = .5 - .5*h;
     rhoCorrected = rho - .5*h;
 
-    ghParams(i) = GraphHomogParams_lattice(dim,geometry,D0,rhoCorrected,m,rate,rateCoeffs,diagJumps,ctr);
-    ghInput(i) = GraphHomogInput(ghParams(i));
-    ghParams(i).rho = rho;
+    geometry.dim = dim;
+    geometry.name = geometryName;
+    geometry.m = m;
+    geometry.rho = rhoCorrected;
+    geometry.diagJumps = diagJumps;
+    geometry.ctr = ctr;
+    geometry.specialSetting_m2 = [];
+    geometry.rateCoeffs = rateCoeffs;
 
-    results_homog(i) = getDeff_homog(ghInput(i));
-    results_mc = [];
+    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,D0,rhoCorrected,m,rate,rateCoeffs,diagJumps,ctr);
+    results(i) = effDiff(L,nodes,edges,edgeRates,edgeJumps,numTraj,startNodeInd,geometry);
+    
     if plotOn
-        plotGraph_lattice(ghParams(i),ghInput(i));
+        plotEdges = 1;
+        plotObs = 1;
+        plotRates = 0;
+        
+        obRad = rho/2;
+        
+        plotGraph(nodes,edges,edgeRates,edgeJumps,geometry.name,obRad,geometry.ctr,plotEdges,plotObs,plotRates);
     end
     i = i+1;
 end
 
 if saveOn
-    fileName = sprintf('results_%s',myClock(6));
-    
-    dirName = sprintf('Results_%dd_%s',dim,geometry);
-    if diagJumps == 1
-        dirName = [dirName '_diagJumps'];
-    elseif diagJumps == 2
-        dirName = [dirName '_diagJumpsCorrected'];
-    end
-    
-    if ~exist(dirName,'dir')
-        mkdir(dirName);
-    end
-    %filename = sprintf('%s/results_%dd_%s',dirname,dim,geometry);
-    %filenameFull = myClockFilename(filename);
-    filenameFull = [dirName '/' fileName];
-    fprintf('Filename: %s\n',filenameFull);
-    save(filenameFull,'results_homog','results_mc','ghParams','ghInput');
+    saveResults(results);
 end

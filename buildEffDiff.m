@@ -1,4 +1,4 @@
-function [Deff, term1, term2] = calcDeffMatrix( edges, edgeRates, edgeJumps, pi0, unitCell_soln )
+function [Deff, term1, term2] = buildEffDiff( edges, edgeRates, edgeJumps, pi0, unitCell_soln )
 % Computes effective diffusivity matrix given necessary ingredients
 % Inputs:
 %   1) edges = an e x 2 array where e = number of edges in the quotient

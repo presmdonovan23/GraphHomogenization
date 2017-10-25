@@ -1,4 +1,4 @@
-function [omega, RHS, relRes, solvability, flag, time] = getUnitCellSoln(L,LTFactors,pi0,ghInput,TOL)
+function [soln, RHS, relRes, solvability, flag, time] = unitCell(L,LTFactors,pi0,nodes,edges,edgeRates,edgeJumps,TOL)
 tic
 
 LL = LTFactors.L; % unpacking LTFactors should not use memory
@@ -9,24 +9,24 @@ R = LTFactors.R;
 
 flag = 1;
 
-if nargin < 5 || isempty(TOL)
+if nargin < 8 || isempty(TOL)
     nNodes = size(L,1);
     TOL = 1e-8;sqrt(eps(1/nNodes));
 end
 
-solvability = sum(ghInput.edgeJumps.*ghInput.edgeRates.*pi0(ghInput.edges(:,1)),1);
+solvability = sum(edgeJumps.*edgeRates.*pi0(edges(:,1)),1);
 if any(solvability > 1e-10)
     warning('Unit cell problem may not be solvable. Solvability res = %.4e.',norm(solvability));
 end
 
-RHS = getUnitCellRHS(ghInput, pi0);
+RHS = getUnitCellRHS(L,nodes,edges,edgeJumps, pi0);
 
 % RHS can be zero. In this case, solution is pi0.
 if norm(RHS(:)) < TOL
-    dim = size(ghInput.edgeJumps,2);
-    omega = repmat(pi0,1,dim);
+    dim = size(edgeJumps,2);
+    soln = repmat(pi0,1,dim);
     
-    err = L'*omega - RHS;
+    err = L'*soln - RHS;
     normErr = sqrt(sum(err.^2,1));
     relRes = normErr;
 else
@@ -36,35 +36,35 @@ else
     warning('off', MSGID1)
     warning('off', MSGID2)
 
-    omega = Q * (U \ (LL \ (P * (R \ RHS))));
+    soln = Q * (U \ (LL \ (P * (R \ RHS))));
 
-    err = L'*omega - RHS;
+    err = L'*soln - RHS;
     normErr = sqrt(sum(err.^2,1));
     normRHS = sqrt(sum(RHS.^2,1));
     relRes = normErr./normRHS;
 
-    if any(relRes > TOL) || any(~isfinite(omega(:)))
+    if any(relRes > TOL) || any(~isfinite(soln(:)))
 
         warning('LU Solver failed (rel res = %.4e). Trying backslash.', max(relRes));
-        omega = L'\RHS;
+        soln = L'\RHS;
 
-        err = L'*omega - RHS;
+        err = L'*soln - RHS;
         normErr = sqrt(sum(err.^2,1));
         normRHS = sqrt(sum(RHS.^2,1));
         relRes = normErr./normRHS;
 
     end
     
-    if any(~isfinite(omega(:)))
+    if any(~isfinite(soln(:)))
         warning('Solution has non-finite entries. Perturbing L.');
         
         perturb = rand(nnz(L),1);
         inds = L ~= 0;
         Lperturb = L;
         Lperturb(inds) = Lperturb(inds) + perturb;
-        omega = (Lperturb)'\RHS;
+        soln = (Lperturb)'\RHS;
 
-        err = L'*omega - RHS;
+        err = L'*soln - RHS;
         normErr = sqrt(sum(err.^2,1));
         normRHS = sqrt(sum(RHS.^2,1));
         relRes = normErr./normRHS;
@@ -93,13 +93,8 @@ fprintf('Calculated unit-cell solution in %.1f seconds.\n',time);
     
 end
 
-function RHS = getUnitCellRHS(ghInput, pi0) %L, pi0, nodes, edges, edgeJumps)
+function RHS = getUnitCellRHS(L,nodes,edges,edgeJumps, pi0) %L, pi0, nodes, edges, edgeJumps)
 tic
-
-L = ghInput.L;
-nodes = ghInput.nodes;
-edges = ghInput.edges;
-edgeJumps = ghInput.edgeJumps;
 
 [nNodes,dim] = size(nodes);
 

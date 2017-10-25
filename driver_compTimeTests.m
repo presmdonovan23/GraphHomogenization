@@ -3,7 +3,7 @@ load('compTimeTests.mat')
 mVals = [ghParams.m];
 n = length(mVals);
 
-% qr decomposition
+%% qr decomposition
 
 clear time_qr res_qr
 for i = 1:8
@@ -20,7 +20,8 @@ for i = 1:8
     
 end
 save('compTimeResults.mat','time_*','res_*');
-% svd decomposition
+
+%% svd decomposition
 
 clear time_svd res_svd
 for i = 1:7
@@ -38,7 +39,8 @@ for i = 1:7
     
 end
 save('compTimeResults.mat','time_*','res_*');
-% eigs
+
+%% eigs
 
 clear time_eigs res_eigs
 for i = 1:n
@@ -55,7 +57,8 @@ for i = 1:n
     
 end
 save('compTimeResults.mat','time_*','res_*');
-% inverse iteration
+
+%% inverse iteration
 
 clear time_ii res_ii
 for i = 1:n
@@ -134,8 +137,8 @@ end
 xlabel('Path length');
 ylabel('Computation time (sec)')
 
-dirname = '/Users/prestondonovan/Documents/School/Research/Thesis/includes/chapter2/';
+%dirname = '/Users/prestondonovan/Documents/School/Research/Thesis/includes/chapter2/';
 
-mySaveFig([dirname 'compTimeStatDist'],fh,'fig')
-mySaveFig([dirname 'compTimeStatDist'],fh,'png')
-mySaveFig([dirname 'compTimeStatDist'],fh,'eps')
+%mySaveFig([dirname 'compTimeStatDist'],fh,'fig')
+%mySaveFig([dirname 'compTimeStatDist'],fh,'png')
+%mySaveFig([dirname 'compTimeStatDist'],fh,'eps')

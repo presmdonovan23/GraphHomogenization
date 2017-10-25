@@ -1,4 +1,13 @@
-function fh = drawHomogLimit(rho,geometry,m,epsInvVals,drawObs,saveOn)
+function fh = drawHomogLimit(rho,geometryName,m,epsInvVals,drawObs,saveOn)
+% ---Calling syntax---
+%
+% rho = .45;
+% geometryName = 'circle';
+% m = 16;
+% epsInvVals = [1 2 4];%[1 2 4 8];
+% drawObs = 0;
+% 
+% drawHomogLimit(rho,geometryName,m,epsInvVals,drawObs,saveOn)
 
 if nargin < 4 || isempty(epsInvVals)
     epsInvVals = [1, 2, 4];
@@ -10,30 +19,22 @@ if nargin < 6 || isempty(saveOn)
     saveOn = 0;
 end
 
-dim = 2;
-diagJumps = 0;
-D0 = 1;
 h = 1/m;
 
-alpha = 0;
-rateCoeffs.alpha = alpha;
+ctr = [];
+drawEdges = 1;
+drawRates = 1;
 
 fh = figure;
 idx = 1;
 for epsInv = epsInvVals
     subplot(1,length(epsInvVals),idx);
-    if strcmpi(geometry,'circle')
-        rate = @(x,j) rate_circle(x,j,h,D0,alpha,rho);
-    elseif strcmpi(geometry,'square')
-        rate = @(x,j) rate_square(x,j,h,D0,alpha,rho);
-    end
-    ghParams = GraphHomogParams_lattice(dim,geometry,D0,rho,m,rate,rateCoeffs,diagJumps);
-    ghInput = GraphHomogInput(ghParams);
 
     for cellNumX = 1:epsInv
         for cellNumY = 1:epsInv
             loc = [cellNumX, cellNumY] - 1;
-            drawCell(loc,ghInput,ghParams,drawObs,fh);
+            
+            fh = drawCell_lattice(rho,m,ctr,geometryName,drawObs,drawEdges,drawRates,saveOn,loc,fh);
         end
     end
     axis square
@@ -44,7 +45,7 @@ for epsInv = epsInvVals
 end
 
 if saveOn
-    filename = ['homogLimit_' geometry '_rho' num2str(round(100*rho))];
+    filename = ['homogLimit_' geometryName '_rho' num2str(round(100*rho))];
     mysavefig(filename, fh, 'fig' );
     mysavefig(filename, fh, 'png' );
 end

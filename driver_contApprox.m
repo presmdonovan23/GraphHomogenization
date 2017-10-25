@@ -1,14 +1,14 @@
 % load lattice data
-load('results_2d_square_2017_05_20_12_21_17.mat')
-m = [ghParams.m];
-lattice_pathLen = 1./m(2:2:end);
+load('Results/results_2d_square_2017_05_20_12_21_17.mat')
+m = 2.^[2:10];%[ghParams.m];
+lattice_pathLen = 1./m;%(2:2:end);
 lattice_Deff = [results_homog.Deff];
 lattice_Deff = lattice_Deff(2:2:end)./lattice_Deff(1:2:end);
 
 % load lattice diag jump data
-load('results_2d_square_diagJumps_2017_05_20_12_22_53.mat')
-m = [ghParams.m];
-latticeD_pathLen = .5*(1./m(2:2:end) + sqrt(2)./m(2:2:end));
+load('Results/results_2d_square_diagJumps_2017_05_20_12_22_53.mat')
+m = 2.^[2:10];%[ghParams.m];
+latticeD_pathLen = .5*(1./m + sqrt(2)./m);%.5*(1./m(2:2:end) + sqrt(2)./m(2:2:end));
 latticeD_Deff = [results_homog.Deff];
 latticeD_Deff = latticeD_Deff(2:2:end)./latticeD_Deff(1:2:end);
 

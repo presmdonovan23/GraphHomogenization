@@ -1,4 +1,4 @@
-function [pi0, relRes, flag, time] = getStatDist(L,LTFactors, TOL)
+function [pi0, relRes, flag, time] = statDist(L,LTFactors, TOL)
 % ** add some checks for how this might fail. maybe do several iterations
 % and choose the best stationary distribution.
 tic
@@ -32,7 +32,14 @@ relRes = norm(L'*pi0)/norm(pi0);
 if relRes > TOL || any(~isfinite(pi0))
     
     warning('Power method failed (rel res = %.4e). Trying eigs.',relRes);
-    [pi0,~] = eigs(L',1,0);
+    
+    try
+        [pi0,~] = eigs(L',1,0);
+    catch ME
+        warning('eigs failed. Trying null(full(L)) because eigs failed: %s',ME.message);
+        pi0 = null(full(L'));
+    end
+        
     
     pi0 = pi0./sum(pi0);
     relRes = norm(L'*pi0)/norm(pi0);
