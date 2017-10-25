@@ -8,7 +8,7 @@ function fh = drawDriftField(rho,m,geometryName,rateCoeffs,drawObs,saveOn)
 % rateCoeffs.K1 = 25;
 % rateCoeffs.K2 = 10;
 % drawObs = 1;
-% 
+% saveOn = 0;
 % drawDriftField(rho,m,geometryName,rateCoeffs,drawObs,saveOn);
 
 if nargin < 5 || isempty(drawObs)

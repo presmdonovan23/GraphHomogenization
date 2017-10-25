@@ -1,7 +1,7 @@
 %% Continuous homogenization vs discrete homogenization
 saveOn = 0;
 
-load('Results_2d_square/results_2017_08_05_10_35_27.mat')
+load('Results_2d_square/results_2017_08_05_10_35_27.mat','results_homog')
 
 x_homog = [1:9];
 y_homog = [2/3 results_homog.Deff];

@@ -137,9 +137,9 @@ end
 
 %% plot nodes
 if dim == 2
-    plot(nodes(:,1),nodes(:,2),'b.','markersize',nodeRad);
+    plot(loc(1) + nodes(:,1),loc(2) + nodes(:,2),'b.','markersize',nodeRad);
 elseif dim == 3
-    plot3(loc(1) + nodes(:,1),loc(2) + nodes(:,2),loc(3) + nodes(:,3),'b.','markersize',35);
+    plot3(loc(1) + nodes(:,1),loc(2) + nodes(:,2),loc(3) + nodes(:,3),'b.','markersize',nodeRad);
 end
 
 %% plot boundary

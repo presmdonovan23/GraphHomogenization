@@ -1,5 +1,5 @@
 function fh = drawWhirlpoolSetting( nodes,edges,edgeRates,edgeJumps,geometry,obRad, plotEdges, plotObs, plotLambda )
-
+% see driver_whirpool.m for appropriate calling syntax
 if nargin < 7 || isempty(plotEdges)
     plotEdges = 1;
 end

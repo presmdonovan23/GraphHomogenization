@@ -4,12 +4,12 @@ if nargin < 2 || isempty(fh)
     fh = figure;
 end
 
+figure(fh);
 nResults = length(results);
 
 geometry = [results.geometry];
 mc = [results.mc];
 
-fh = figure;
 hold on
 
 plot([geometry.rho],[results.Deff],'.-','markersize',15)

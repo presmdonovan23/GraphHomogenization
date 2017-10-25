@@ -1,16 +1,19 @@
-function fh = drawHomogLimit(rho,geometryName,m,epsInvVals,drawObs,saveOn)
+function fh = drawHomogLimit(rho,geometryName,m,epsVals,drawObs,saveOn)
+% Currently there is a minor issue where the node sizes will not shrink
+% with epsilon. This can be easily implemented by allowing the node size to
+% be passed to drawCell_lattice.
 % ---Calling syntax---
 %
 % rho = .45;
 % geometryName = 'circle';
 % m = 16;
-% epsInvVals = [1 2 4];%[1 2 4 8];
+% epsVals = [1 1/2 1/4];
 % drawObs = 0;
-% 
-% drawHomogLimit(rho,geometryName,m,epsInvVals,drawObs,saveOn)
+% saveOn = 0;
+% drawHomogLimit(rho,geometryName,m,epsVals,drawObs,saveOn);
 
-if nargin < 4 || isempty(epsInvVals)
-    epsInvVals = [1, 2, 4];
+if nargin < 4 || isempty(epsVals)
+    epsVals = [1, 1/2, 1/4];
 end
 if nargin < 5 || isempty(drawObs)
     drawObs = 1;
@@ -23,12 +26,13 @@ h = 1/m;
 
 ctr = [];
 drawEdges = 1;
-drawRates = 1;
+drawRates = 0;
 
 fh = figure;
 idx = 1;
-for epsInv = epsInvVals
-    subplot(1,length(epsInvVals),idx);
+for i = 1:length(epsVals)
+    epsInv = 1/epsVals(i);
+    subplot(1,length(epsVals),idx);
 
     for cellNumX = 1:epsInv
         for cellNumY = 1:epsInv
@@ -44,6 +48,16 @@ for epsInv = epsInvVals
     idx = idx + 1;
 end
 
+% nodes look better if their size is scaled by epsilon
+for i = 1:length(fh.Children)
+    
+    eps = epsVals(1 + length(fh.Children) - i);
+    
+    markerChildren = arrayfun(@(c) isa(c,'matlab.graphics.chart.primitive.Line'),fh.Children(i).Children);
+    mSize = 1.25*fh.Children(i).Children(find(markerChildren,1)).MarkerSize*eps; % get marker size of first valid child
+    set(fh.Children(i).Children(markerChildren),'MarkerSize',mSize);
+    
+end
 if saveOn
     filename = ['homogLimit_' geometryName '_rho' num2str(round(100*rho))];
     mysavefig(filename, fh, 'fig' );

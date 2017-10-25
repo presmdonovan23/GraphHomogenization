@@ -40,7 +40,7 @@ rate = [];
 [~,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(...
     dim,geometryName,D0,rho,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
         
-drawCell(loc,nodes,edges,edgeRates,edgeJumps,geometryName,m,rho,ctr,drawObs,drawEdges,drawRates,fh)
+drawCell(loc,nodes,edges,edgeRates,edgeJumps,geometryName,m,rho,ctr,drawObs,drawEdges,drawRates,fh);
 
 if saveOn
     filename = [geometryName '_rho' num2str(round(100*rho)) '_m' num2str(m)];

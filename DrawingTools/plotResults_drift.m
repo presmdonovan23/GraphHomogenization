@@ -4,33 +4,29 @@
 %   2) bonding at boundary
 %   3) attraction at boundary
 %   4) repulsion at boundary
-saveOn = 1;
+saveOn = 0;
 
 dirName = '/Users/prestondonovan/Documents/School/Research/MATLAB Code/Discrete Homogenization/GraphHomogenization/';
 
 dirnameSub = 'Results_2d_square/';
 filename = 'results_2017_08_13_10_24_53.mat';
-load([dirName dirnameSub filename]);
+load([dirName dirnameSub filename],'results_homog');
 results_regular = results_homog;
-ghParams_regular = ghParams;
 
 dirnameSub = 'Results_2d_squareBonding/';
 filename = 'results_2017_08_13_10_24_53.mat';
-load([dirName dirnameSub filename]);
+load([dirName dirnameSub filename],'results_homog');
 results_bonding = results_homog;
-ghParams_bonding = ghParams;
 
 dirnameSub = 'Results_2d_squareBdyRepel/';
 filename = 'results_2017_08_13_10_24_54.mat';
-load([dirName dirnameSub filename]);
+load([dirName dirnameSub filename],'results_homog');
 results_bdyRepel = results_homog;
-ghParams_bdyRepel = ghParams;
 
 dirnameSub = 'Results_2d_squareBdyAttract/';
 filename = 'results_2017_08_13_10_24_54.mat';
-load([dirName dirnameSub filename]);
+load([dirName dirnameSub filename],'results_homog');
 results_bdyAttract = results_homog;
-ghParams_bdyAttract = ghParams;
 
 fh = figure;
 bh = bar([results_regular.Deff,results_bonding.Deff,results_bdyRepel.Deff,results_bdyAttract.Deff]);
