@@ -1,4 +1,4 @@
-function results = effDiff_mc(L, nodes, edges, edgeJumps, numTraj, startNodeInd, plotOn, negateSteps )
+function mc = effDiff_mc(L, nodes, edges, edgeJumps, numTraj, startNodeInd, plotOn, negateSteps )
 
 if nargin < 5 || isempty(numTraj)
     numTraj = 1000;
@@ -30,7 +30,6 @@ if numTraj == 0
     mc.trajectoryPos = [];
     mc.startNodeInd = [];
 
-    results.mc = mc;
     return;
 end
 
@@ -97,8 +96,6 @@ mc.Deff_all = Deff_all;
 mc.Deff_var = DeffVar;
 mc.Deff_var_all = DeffVar_all;
 mc.Deff_95CI = [Deff_CI_low,Deff_CI_high];
-
-results.mc = mc;
 
 if plotOn
     figure
