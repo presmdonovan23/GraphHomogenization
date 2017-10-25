@@ -1,4 +1,5 @@
 load('compTimeTests.mat')
+saveOn = 0;
 
 mVals = [ghParams.m];
 n = length(mVals);
@@ -19,7 +20,9 @@ for i = 1:8
     res_qr(i) = norm(L'*pi0);
     
 end
-save('compTimeResults.mat','time_*','res_*');
+if saveOn
+    save('compTimeResults.mat','time_*','res_*');
+end
 
 %% svd decomposition
 
@@ -38,8 +41,9 @@ for i = 1:7
     res_svd(i) = norm(L'*pi0);
     
 end
-save('compTimeResults.mat','time_*','res_*');
-
+if saveOn
+    save('compTimeResults.mat','time_*','res_*');
+end
 %% eigs
 
 clear time_eigs res_eigs
@@ -56,8 +60,9 @@ for i = 1:n
     res_eigs(i) = norm(L'*pi0);
     
 end
-save('compTimeResults.mat','time_*','res_*');
-
+if saveOn
+    save('compTimeResults.mat','time_*','res_*');
+end
 %% inverse iteration
 
 clear time_ii res_ii
@@ -81,7 +86,10 @@ for i = 1:n
     res_ii(i) = norm(L'*pi0);
     
 end
-save('compTimeResults.mat','time_*','res_*');
+if saveOn
+    save('compTimeResults.mat','time_*','res_*');
+end
+
 clearvars -except time_* res_* mVals
 
 %% plot
