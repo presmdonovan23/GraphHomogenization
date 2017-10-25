@@ -79,7 +79,6 @@ edgeRates = edgeRates*s;
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,numTraj,startNodeInd,geometry);
 
 %%
-dirname = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
 
 if plotOn
     
@@ -89,6 +88,7 @@ if plotOn
     obRad = rho/2;
     fh = drawWhirlpoolSetting( nodes,edges,edgeRates,edgeJumps,geometry,obRad, plotEdges, plotObs, plotLambda );
 
+    % dirname = '';
     %mySaveFig([dirname 'detailedBalance2'],fh,'fig')
     %mySaveFig([dirname 'detailedBalance2'],fh,'png')
     %mySaveFig([dirname 'detailedBalance2'],fh,'eps')

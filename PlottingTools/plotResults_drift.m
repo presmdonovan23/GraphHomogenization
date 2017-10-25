@@ -6,26 +6,24 @@
 %   4) repulsion at boundary
 saveOn = 0;
 
-dirName = '/Users/prestondonovan/Documents/School/Research/MATLAB Code/Discrete Homogenization/GraphHomogenization/';
-
-dirnameSub = 'Results_2d_square/';
+dirName = 'Results_2d_square/';
 filename = 'results_2017_08_13_10_24_53.mat';
-load([dirName dirnameSub filename],'results_homog');
+load([dirName filename],'results_homog');
 results_regular = results_homog;
 
-dirnameSub = 'Results_2d_squareBonding/';
+dirName = 'Results_2d_squareBonding/';
 filename = 'results_2017_08_13_10_24_53.mat';
-load([dirName dirnameSub filename],'results_homog');
+load([dirName filename],'results_homog');
 results_bonding = results_homog;
 
-dirnameSub = 'Results_2d_squareBdyRepel/';
+dirName = 'Results_2d_squareBdyRepel/';
 filename = 'results_2017_08_13_10_24_54.mat';
-load([dirName dirnameSub filename],'results_homog');
+load([dirName filename],'results_homog');
 results_bdyRepel = results_homog;
 
-dirnameSub = 'Results_2d_squareBdyAttract/';
+dirName = 'Results_2d_squareBdyAttract/';
 filename = 'results_2017_08_13_10_24_54.mat';
-load([dirName dirnameSub filename],'results_homog');
+load([dirName filename],'results_homog');
 results_bdyAttract = results_homog;
 
 fh = figure;
@@ -42,7 +40,7 @@ text(bh.XData,bh.YData',num2str(bh.YData','%0.4f'),...
     'fontsize',18)
 
 if saveOn
-    dirName = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
+    dirName = '';
     filename = 'driftEffectsDeff';
     mySaveFig([dirName 'driftEffectsDeff'],fh,'fig')
     mySaveFig([dirName 'driftEffectsDeff'],fh,'png')

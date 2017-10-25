@@ -139,7 +139,7 @@ if plotOn
     ca = gca;
     ca.FontSize = 18;
     
-    %dirName = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
+    %dirName = '';
     %filename = 'driftEffectsDeff';
     %mySaveFig([dirName 'driftEffectsDeff'],fh,'fig')
     %mySaveFig([dirName 'driftEffectsDeff'],fh,'png')

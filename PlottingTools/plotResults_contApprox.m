@@ -2,23 +2,22 @@
 m = 2.^[2:8];
 m_ext = 2.^[2:9];
 
-dirname = '/Users/prestondonovan/Documents/School/Research/MATLAB Code/Discrete Homogenization/GraphHomogenization/';
 load('/Users/prestondonovan/Documents/School/Research/MATLAB Code/Data Processing/Simulation_2d/FixedPathLength/results.mat');
 results_cont = results;
 
-load([dirname 'results/results_2d_square_2017_07_19_09_37_30.mat'],'results_homog');
+load('Results/results_2d_square_2017_07_19_09_37_30.mat','results_homog');
 results_discrete = results_homog;
 
-load([dirname 'Results_2d_square_diagJumpsCorrected/results_2017_08_13_18_38_51.mat'],'results_homog');
+load('Results_2d_square_diagJumpsCorrected/results_2017_08_13_18_38_51.mat','results_homog');
 results_discrete_diagC = results_homog;
 
-load([dirname 'Results_2d_square_diagJumps/results_2017_07_29_13_28_21.mat'],'results_homog');
+load('Results_2d_square_diagJumps/results_2017_07_29_13_28_21.mat','results_homog');
 results_discrete_diag = results_homog;
 
-load([dirname 'Results_2d_squareBdySlow/results_2017_08_14_12_49_25.mat'],'results_homog');
+load('Results_2d_squareBdySlow/results_2017_08_14_12_49_25.mat','results_homog');
 results_obsBdy = results_homog;
 
-load([dirname 'Results_2d_squareBdySlow_diagJumps/results_2017_08_14_12_49_38.mat'],'results_homog');
+load('Results_2d_squareBdySlow_diagJumps/results_2017_08_14_12_49_38.mat','results_homog');
 results_obsBdy_diag = results_homog;
 
 sim_spec = [results_cont.sim_spec];
@@ -117,7 +116,7 @@ ca.XTickLabel = {'2^{-2}','2^{-3}','2^{-4}','2^{-5}','2^{-6}','2^{-7}','2^{-8}'}
 axis([1.5 8 .66 .78])
 if saveOn
 
-    dirName = '/Users/prestondonovan/Documents/School/Research/Thesis/includes/chapter2/';
+    dirName = '';
     filename = 'contVsDiscVsDiscdiag';
     
     mySaveFig([dirName filename],fh,'fig')

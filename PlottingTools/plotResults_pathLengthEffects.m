@@ -30,7 +30,7 @@ for i = 1:9
 end
 
 if saveOn
-    dirname = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
+    dirname = '';
 
     mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'fig')
     mySaveFig([dirname 'pathLengthEffectsDeff'],fh,'png')
