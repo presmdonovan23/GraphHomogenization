@@ -116,34 +116,3 @@ end
 if saveOn
     filename{4} = saveResults(results);
 end
-
-%% plot results
-if plotOn
-    load(filename{1});
-    results_regular = results;
-    load(filename{2});
-    results_bonding = results;
-    load(filename{3});
-    results_bdyAttract = results;
-    load(filename{4});
-    results_bdyRepel = results;
-    
-    fh = figure;
-    bh = bar([results_regular.Deff,results_bonding.Deff,results_bdyRepel.Deff,results_bdyAttract.Deff]);
-    text(bh.XData,bh.YData',num2str(bh.YData','%0.2f'),...
-        'HorizontalAlignment','center',...
-        'VerticalAlignment','bottom')
-    ca = gca;
-    ca.XTickLabel = {'Neutral','Bonding','Repulsion','Attraction'};
-    ylabel('D_e')
-    ca = gca;
-    ca.FontSize = 18;
-    
-    %dirName = '';
-    %filename = 'driftEffectsDeff';
-    %mySaveFig([dirName 'driftEffectsDeff'],fh,'fig')
-    %mySaveFig([dirName 'driftEffectsDeff'],fh,'png')
-    %mySaveFig([dirName 'driftEffectsDeff'],fh,'eps')
-
-end
-
