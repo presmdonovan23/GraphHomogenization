@@ -76,19 +76,7 @@ L = L*s;
 edgeRates = edgeRates*s;
 %%
 
-
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,numTraj,startNodeInd,geometry);
-
-%[LTFactors, LUtime] = LUFull(L');
-
-%[pi0, pi0_relRes, pi0_flag, pi0_time] = statDist(L,LTFactors);
-
-%[unitCell_soln, unitCell_RHS, unitCell_relRes, unitCell_solvability, unitCell_flag, unitCell_time] = ...
-%    unitCell(L,LTFactors,pi0,nodes,edges,edgeRates,edgeJumps);
-
-%[Deff,DeffTerm1,DeffTerm2] = buildEffDiff( edges, edgeRates, edgeJumps, pi0, unitCell_soln );
-
-
 
 %%
 dirname = '/Users/prestondonovan/Documents/School/Research/My Notes & Papers/[Donovan,Rathinam]_Graph_Homogenization Publication/publication/figures/';
