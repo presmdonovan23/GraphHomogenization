@@ -61,38 +61,50 @@ ca.XLim(1) = 1;
 %% Publication: Continuous vs discrete vs discrete w/ diag corrected
 saveOn = 0;
 
-m = 2.^[2:8];
-m_C = 2.^[2:9];
-
-dirname = '/Users/prestondonovan/Documents/School/Research/MATLAB Code/Discrete Homogenization/GraphHomogenization/';
+% continuous data
 load('/Users/prestondonovan/Documents/School/Research/MATLAB Code/Data Processing/Simulation_2d/FixedPathLength/results.mat');
 results_cont = results;
 sim_spec = [results_cont.sim_spec];
 
-load([dirname 'results/results_2d_square_2017_07_19_09_37_30.mat'],'results_homog');
-results_discrete = results_homog;
-
-load([dirname 'Results_2d_square_diagJumpsCorrected/results_2017_08_13_18_38_51.mat'],'results_homog');
-results_discrete_diagC = results_homog;
-
 pathLen_cont = [sim_spec.path_len];
-pathLen_disc = 1./m;%1./[ghParams_discrete.m];
-pathLen_disc_diagC = (.5*(sqrt(2) + 1))./m_C;%(.5*(sqrt(2) + 1))./[ghParams_discrete_diagC.m];
-
 CI = [results_cont.Deff95CI];
 CIlow = CI(1:2:end);
 CIhigh = CI(2:2:end);
 Deff_cont = [results_cont.Deff];
+
+% discrete data
+load('Results/results_2d_square_2017_07_19_09_37_30.mat','results_homog');
+results_discrete = results_homog;
+
+m = 2.^[2:8];
+pathLen_disc = 1./m;%1./[ghParams_discrete.m];
 Deff_disc = [results_discrete.Deff];
+
+% discrete diag data. results collected at two points in time. methodologies for diag jumps
+% differed.
+load('Results_2d_square_diagJumpsCorrected/results_2017_08_13_18_38_51.mat','results_homog');
+results_discrete_diagC = results_homog(1:8);
 Deff_disc_diagC = [results_discrete_diagC.Deff];
 
+% newer discrete diag jump data. methodology differed slightly
+%{
+load('Results/results_2d_square_diagJumps_2017_05_20_12_22_53.mat','results_homog');
+results_discrete_diagC = results_homog;
+results_discrete_diagC = results_discrete_diagC(1:16);
+Deff_disc_diagC = [results_discrete_diagC.Deff];
+Deff_disc_diagC = Deff_disc_diagC(2:2:end)./Deff_disc_diagC(1:2:end);
+%}
+m_C = 2.^[2:9];
+pathLen_disc_diagC = (.5*(sqrt(2) + 1))./m_C;%(.5*(sqrt(2) + 1))./[ghParams_discrete_diagC.m];
+
+% plot
 fh = figure;
 hold on
 errorbar(log2(1./pathLen_cont),Deff_cont,...
     .5*(CIhigh - CIlow),'.-','markersize',30);
 h = plot(log2(1./pathLen_disc),Deff_disc,'s-','markersize',10);
 set(h, 'MarkerFaceColor', get(h, 'Color'));
-h = plot(log2(1./pathLen_disc_diagC(1:7)),Deff_disc_diagC(1:7),'d-','markersize',10);
+h = plot(log2(1./pathLen_disc_diagC),Deff_disc_diagC,'d-','markersize',10);
 set(h, 'MarkerFaceColor', get(h, 'Color'));
 
 legend('Continuous','Discrete','Discrete w/ diagonal jumps','location','southeast');
