@@ -14,8 +14,6 @@ specialSetting_m2 = 'none';
 startNodeInd = 1;
 numTraj = 100;
 
-rate = []; % field is current obsolete
-
 % rate parameters
 alpha = 0;
 K1 = 25;

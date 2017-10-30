@@ -1,7 +1,7 @@
 function [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(...
-    dim,geometryName,obRad,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2)
+    dim,geometryName,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2)
 
-if nargin < 7 || isempty(rateCoeffs)
+if nargin < 5 || isempty(rateCoeffs)
     rateCoeffs.K1 = 0;
     rateCoeffs.K2 = 0;
     rateCoeffs.alpha = 0;
@@ -9,13 +9,13 @@ if nargin < 7 || isempty(rateCoeffs)
     rateCoeffs.dist = 0;
 end
     
-if nargin < 8 || isempty(diagJumps)
+if nargin < 6 || isempty(diagJumps)
     diagJumps = 0;
 end
-if nargin < 9 || isempty(ctr)
+if nargin < 7 || isempty(ctr)
     ctr = .5;
 end
-if nargin < 10 || isempty(specialSetting_m2)
+if nargin < 8 || isempty(specialSetting_m2)
     specialSetting_m2 = 'none';
 end
 
