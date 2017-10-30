@@ -1,4 +1,4 @@
-function fh = plotRhoVsEffDiff(results,fh)
+function fh = plotObRadVsEffDiff(results,fh)
 
 if nargin < 2 || isempty(fh)
     fh = figure;
@@ -12,15 +12,15 @@ mc = [results.mc];
 
 hold on
 
-plot([geometry.rho],[results.Deff],'.-','markersize',15)
+plot([geometry.obRad],[results.Deff],'.-','markersize',15)
 
 if mc(1).numTraj > 0
     CI = reshape([mc.Deff_95CI],2,nResults)';
-    errorbar([geometry.rho],[mc.Deff],...
+    errorbar([geometry.obRad],[mc.Deff],...
         .5*(CI(:,2) - CI(:,1)),'.-','markersize',15);
 end
 
-xlabel('rho')
+xlabel('Obstruction Radius')
 ylabel('D_e')
 
 legend('Homogenization Theory','Monte Carlo (95% CI)')

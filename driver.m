@@ -4,8 +4,7 @@ plotOn = 1;
 % geometry parameters
 dim = 2;
 geometryName = 'circle';
-D0 = 1;
-rho = .5;
+obRad = .25;
 m = 5;
 diagJumps = 0; % diagJumps = 2 => corrected diagonal jumps
 obCtr = .5;
@@ -30,14 +29,14 @@ rateCoeffs.delta = delta;
 geometry.dim = dim;
 geometry.name = geometryName;
 geometry.m = m;
-geometry.rho = rho;
+geometry.obRad = obRad;
 geometry.diagJumps = diagJumps;
 geometry.ctr = obCtr;
 geometry.specialSetting_m2 = specialSetting_m2;
 geometry.rateCoeffs = rateCoeffs;
         
 [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(...
-    dim,geometryName,D0,rho,m);
+    dim,geometryName,obRad,m);
 
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,...
                     numTraj,startNodeInd,geometry);

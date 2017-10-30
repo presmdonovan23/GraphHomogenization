@@ -1,4 +1,4 @@
-function [fh, nodes, edges, edgeJumps] = drawCell_lattice(rho,m,ctr,geometryName,drawObs,drawEdges,drawRates,saveOn,loc,fh)
+function [fh, nodes, edges, edgeJumps] = drawCell_lattice(obRad,m,ctr,geometryName,drawObs,drawEdges,drawRates,saveOn,loc,fh)
 % ---Calling syntax---
 %
 % saveOn = 0;
@@ -31,19 +31,18 @@ end
 dim = 2;
 
 diagJumps = 0;
-D0 = 1;
 rateCoeffs = [];
 specialSetting_m2 = 'none';
 
 rate = [];
 
 [~,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(...
-    dim,geometryName,D0,rho,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
+    dim,geometryName,obRad,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
         
-drawCell(loc,nodes,edges,edgeRates,edgeJumps,geometryName,m,rho,ctr,drawObs,drawEdges,drawRates,fh);
+drawCell(loc,nodes,edges,edgeRates,edgeJumps,geometryName,m,obRad,ctr,drawObs,drawEdges,drawRates,fh);
 
 if saveOn
-    filename = [geometryName '_rho' num2str(round(100*rho)) '_m' num2str(m)];
+    filename = [geometryName '_obRad' num2str(round(100*obRad)) '_m' num2str(m)];
     mySaveFig(filename, fh, 'fig' );
     mySaveFig(filename, fh, 'png' );
     mySaveFig(filename, fh, 'eps' );

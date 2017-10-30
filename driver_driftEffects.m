@@ -5,13 +5,12 @@
 %   4) repulsion at boundary
 
 saveOn = 0;
-rho = .5;
+obRad = .25;
 m = 8;
 h = 1/m;
 dim = 2;
 
 diagJumps = 0; % diagJumps = 2 => corrected diagonal jumps
-D0 = 1;
 ctr = .5;
 specialSetting_m2 = 'none';
 
@@ -29,7 +28,7 @@ rateCoeffs.K1 = [];
 rateCoeffs.K2 = [];
 geometry.dim = dim;
 geometry.m = m;
-geometry.rho = rho;
+geometry.obRad = obRad;
 geometry.diagJumps = diagJumps;
 geometry.ctr = ctr;
 geometry.specialSetting_m2 = specialSetting_m2;
@@ -38,7 +37,7 @@ geometry.specialSetting_m2 = specialSetting_m2;
 geometry.name = 'square';
 geometry.rateCoeffs = rateCoeffs;
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,D0,rho,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
 
 if plotOn
@@ -47,7 +46,7 @@ if plotOn
     drawObs = 1;
     drawRates = 0;
     
-    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,rho,ctr,drawObs,drawEdges,drawRates,[]);
+    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,obRad,ctr,drawObs,drawEdges,drawRates,[]);
     
 end
 if saveOn
@@ -59,7 +58,7 @@ rateCoeffs.delta = .5;
 geometry.name = 'squareBonding';
 geometry.rateCoeffs = rateCoeffs;
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,D0,rho,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
 
 if plotOn
@@ -68,7 +67,7 @@ if plotOn
     drawObs = 1;
     drawRates = 0;
     
-    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,rho,ctr,drawObs,drawEdges,drawRates,[]);
+    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,obRad,ctr,drawObs,drawEdges,drawRates,[]);
     
 end
 if saveOn
@@ -80,7 +79,7 @@ rateCoeffs.delta = 2;
 geometry.name = 'squareBdyAttract';
 geometry.rateCoeffs = rateCoeffs;
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,D0,rho,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
 
 if plotOn
@@ -89,7 +88,7 @@ if plotOn
     drawObs = 1;
     drawRates = 0;
     
-    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,rho,ctr,drawObs,drawEdges,drawRates,[]);
+    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,obRad,ctr,drawObs,drawEdges,drawRates,[]);
     
 end
 if saveOn
@@ -101,7 +100,7 @@ rateCoeffs.delta = 2;
 geometry.name = 'squareBdyRepel';
 geometry.rateCoeffs = rateCoeffs;
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,D0,rho,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
 
 if plotOn
@@ -110,7 +109,7 @@ if plotOn
     drawObs = 1;
     drawRates = 0;
     
-    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,rho,ctr,drawObs,drawEdges,drawRates,[]);
+    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,obRad,ctr,drawObs,drawEdges,drawRates,[]);
     
 end
 if saveOn

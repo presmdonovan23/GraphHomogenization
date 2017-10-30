@@ -34,4 +34,4 @@ A set of functions for drawing various graph poperties and plotting the effectiv
 - **drawCell.m** Draws a periodic cell of the graph.
 - **drawCell_lattice.m** Draws a periodic cell of the graph assuming the graph satisfies certain geometric conditions.
 - **drawDriftField.m** Draws a vector field based on the drift function.
-- **plotRhoVsEffDiff.m** Plots the effective diffusivities computed by homogenization theory and Monte Carlo simulation against rho.
+- **plotObRadVsEffDiff.m** Plots the effective diffusivities computed by homogenization theory and Monte Carlo simulation against obstruction radius.

@@ -1,4 +1,4 @@
-function fh = drawCell(loc,nodes,edges,edgeRates,edgeJumps,geometryName,m,rho,ctr,drawObs,drawEdges,drawRates,fh)
+function fh = drawCell(loc,nodes,edges,edgeRates,edgeJumps,geometryName,m,obRad,ctr,drawObs,drawEdges,drawRates,fh)
 
 dim = size(nodes,2);
 if nargin < 1 || isempty(loc)
@@ -25,7 +25,7 @@ hold on;
 
 h = 1/m;
 nodeRad = 175*h;
-obRad = rho/2;
+
 if drawObs
     
     if dim == 2
@@ -39,7 +39,7 @@ if drawObs
                         'Curvature',[1 1]);
 
         elseif contains(geometryName,'square')
-            s = rho;
+            s = 2*obRad;
 
             cornerX = loc(1) + ctr - .5*s;
             cornerY = loc(2) + ctr - .5*s;

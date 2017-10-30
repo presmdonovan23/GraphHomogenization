@@ -1,4 +1,4 @@
-function [val,mu] = rate_lattice(x,y,dim,geometry,D0,R,h,alpha,diagJumps,K1,K2)
+function [val,mu] = rate_lattice(x,y,dim,geometry,obRad,h,alpha,diagJumps,K1,K2)
 % Note that x = edge start and y = x + nu. This method will not work
 % correctly if y - x != nu. E.g., [.1,.1] and [.1,.9].
 % You can assume the edge (x,y) exists and has a positive rate. This is
@@ -9,9 +9,9 @@ if alpha ~= 0 && (diagJumps >= 1 || strcmpi(geometry,'square'))
 end
 
 if diagJumps == 0
-    lambda = D0/h^2;
+    lambda = 1/h^2;
 else
-    lambda = D0/(3*h^2);
+    lambda = 1/(3*h^2);
 end
 
 nNodes = size(x,1);
@@ -20,7 +20,7 @@ if alpha == 0
     val = lambda*ones(nNodes,1);
     
     if diagJumps == 2 && strcmpi(geometry,'square') && dim == 2
-        S = R*2;
+        S = obRad*2;
         val = correctDiag(val,lambda,x,y,h,S);
     elseif diagJumps == 2
         error('Corrected diagonal jumps only implemented for 2d square with no drift.');
@@ -30,7 +30,7 @@ else % no diagonal jumps. all jumps along basis vectors
     ctr = .5;
     
     jump = (abs(y - x) > 1e-12).*sign(y - x); % only 1 component will be nonzero
-    mu = drift(x,ctr,R,K1,K2);
+    mu = drift(x,ctr,obRad,K1,K2);
     
     d = sum(jump.*mu,2);  % contains the x,y, or z component of drift
     
@@ -40,13 +40,13 @@ end
 
 end
 
-function val = drift(x,ctr,R,K1,K2)
+function val = drift(x,ctr,obRad,K1,K2)
 % only makes sense for circular obstuctions
 
 relX = x - ctr;
 relNorm = sqrt(sum(relX.^2,2));
 
-dist2ob = relNorm - R;
+dist2ob = relNorm - obRad;
 xNormalized = relX./relNorm;
 
 val = K1*xNormalized.*exp(-K2*dist2ob);
