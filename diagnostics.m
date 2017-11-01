@@ -199,8 +199,8 @@ end
 load('Results_2d_squareBdySlow/results_2017_08_14_12_49_25.mat','results_homog');
 norm([results.Deff] - [results_homog.Deff])
 
-%% slowed rates at boundary with diagonal jumps
-
+%% slowed rates at boundary with diagonal jumps (still working on agreement)
+%{
 dim = 2;
 obRad = .25;
 specialSetting_m2 = [];
@@ -230,16 +230,45 @@ for i = 1:length(mVals)
     results(i) = curRes;
 
 end
+%}
+mVals = 2.^[2:9];
+mVals = 8;
+dim = 2;
+name = 'square';
+obRad = .25;
+obCtr = [.5 .5];
+diagJumps = 1;
+specialSetting = 'bdySlow';
+driftMult = 0;
+driftDecay = [];
+obSlowdownFctr = 2;
+bdyDist = [];
+
+for i = 1:length(mVals)
+    m = mVals(i);
+    h = 1/m;
+    
+    obCtr = .75 - .5*h;
+    obRadCorrected = obRad - .25*h;
+    bdyDist = .9999*h;
+    
+    latticeGeo = LatticeGeometry(dim, m, name, obRadCorrected, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+    
+    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+
+    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
+
+    results(i) = curRes;
+
+end
 
 load('Results_2d_squareBdySlow_diagJumps/results_2017_08_14_12_49_38.mat','results_homog');
 norm([results.Deff] - [results_homog.Deff])
-%% drift field
+%% drift field (still working on agreement)
 
-load('Results/results_2d_circle_m64_alpha1_noapprox.mat')
-results_orig = [results.Deffres];
-Deff_orig = [results_orig.Deff_homog];
-Deff_orig = Deff_orig(1,1:2:end);
-
+%{
 clear results
 
 saveOn = 0;
@@ -282,5 +311,37 @@ for i = 1:length(obRads)
     results(i) = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
     
 end
+%}
 
+m = 64;
+dim = 2;
+name = 'circle';
+obRadVals = (.05:.05:.45);
+obCtr = [.5 .5];
+diagJumps = 0;
+specialSetting = 'none';
+driftMult = 25;
+driftDecay = 10;
+obSlowdownFctr = [];
+bdyDist = [];
+
+for i = 1:length(obRadVals)
+    obRad = obRadVals(i);
+    
+    latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+    
+    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+
+    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
+
+    results(i) = curRes;
+
+end
+
+results_orig = load('Results/results_2d_circle_m64_alpha1_noapprox.mat');
+results_orig = [results_orig.Deffres];
+Deff_orig = [results_orig.Deff_homog];
+Deff_orig = Deff_orig(1,1:2:end);
 norm([results.Deff] - Deff_orig)
