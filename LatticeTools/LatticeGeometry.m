@@ -33,15 +33,18 @@ classdef LatticeGeometry < handle
                                 'bdyRepel',...
                                 'bdyAttract',...
                                 'm2_blockOneSite',...
-                                'm2_slowOneSite'};
+                                'm2_slowOneSite',...
+                                'bdySlow'};
         % settings where obSlowdownFctr can be defined
         validSlowdownSettings = {'slowdown',...
                                  'bdyBonding',...
                                  'bdyRepel',...
-                                 'bdyAttract'};
+                                 'bdyAttract',...
+                                 'bdySlow'};
         validBdyDistSettings = {'bdyBonding',...
                                 'bdyRepel',...
-                                'bdyAttract'};
+                                'bdyAttract',...
+                                'bdySlow'};
 
         %%% *** What is bdySlow setting??%%%
         
@@ -113,6 +116,10 @@ classdef LatticeGeometry < handle
                 else
                     bdyDist = [];
                 end
+            end
+            
+            if length(obCtr) == 1
+                obCtr = obCtr*ones(1,dim);
             end
             
             this.dim = dim;
@@ -190,7 +197,7 @@ classdef LatticeGeometry < handle
             end
             if this.driftMult ~= 0 && ~strcmpi(this.specialSetting,'none')
                 count = count+1;
-                errors{count} = 'Drift should be 0 for special settings. Might work fine, haven''t tested.');
+                errors{count} = 'Drift should be 0 for special settings. Might work fine, haven''t tested.';
             end
             % driftDecay
             if this.driftDecay < 0

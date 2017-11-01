@@ -1,4 +1,4 @@
-function [fh, nodes, edges, edgeJumps] = drawCell_lattice(obRad,m,ctr,geometryName,drawObs,drawEdges,drawRates,saveOn,loc,fh)
+function [fh, nodes, edges, edgeJumps] = drawCell_lattice(latticeGeo,drawObs,drawEdges,drawRates,saveOn,loc,fh)
 % ---Calling syntax---
 %
 % saveOn = 0;
@@ -9,37 +9,28 @@ function [fh, nodes, edges, edgeJumps] = drawCell_lattice(obRad,m,ctr,geometryNa
 % ctr = .5;
 % drawSetting(rho,m,ctr,geometryName,drawObs,saveOn)
 
-if nargin < 5 || isempty(drawObs)
+if nargin < 2 || isempty(drawObs)
     drawObs = 1;
 end
-if nargin < 6 || isempty(drawEdges)
+if nargin < 3 || isempty(drawEdges)
     drawEdges = 1;
 end
-if nargin < 7 || isempty(drawRates)
-    drawEdges = 1;
+if nargin < 4 || isempty(drawRates)
+    drawRates = 1;
 end
-if nargin < 8 || isempty(saveOn)
+if nargin < 5 || isempty(saveOn)
     saveOn = 0;
 end
-if nargin < 9 || isempty(loc)
-    loc = [0, 0];
+if nargin < 6 || isempty(loc)
+    loc = zeros(1,latticeGeo.dim);
 end
-if nargin < 10 || isempty(fh)
+if nargin < 7 || isempty(fh)
     fh = figure;
 end
 
-dim = 2;
-
-diagJumps = 0;
-rateCoeffs = [];
-specialSetting_m2 = 'none';
-
-rate = [];
-
-[~,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(...
-    dim,geometryName,obRad,m,rate,rateCoeffs,diagJumps,ctr,specialSetting_m2);
+[~,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
         
-drawCell(loc,nodes,edges,edgeRates,edgeJumps,geometryName,m,obRad,ctr,drawObs,drawEdges,drawRates,fh);
+drawCell(latticeGeo,nodes,edges,edgeRates,edgeJumps,loc,drawObs,drawEdges,drawRates,fh);
 
 if saveOn
     filename = [geometryName '_obRad' num2str(round(100*obRad)) '_m' num2str(m)];

@@ -5,181 +5,206 @@
 %   3) attraction at boundary
 %   4) repulsion at boundary
 
-saveOn = 0;
-obRad = .25;
-m = 8;
-h = 1/m;
 dim = 2;
+m = 8;
+name = 'square';
+obRad = .25;
+obCtr = [.5 .5];
+diagJumps = 0;
+specialSetting = 'none';
+driftMult = 0;
+driftDecay = [];
+obSlowdownFctr = [];
+bdyDist = [];
 
-diagJumps = 0; % diagJumps = 2 => corrected diagonal jumps
-ctr = .5;
-specialSetting_m2 = 'none';
+latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
 
-startNodeInd = 1;
-numTraj = 0;
-plotOn = 0;
-drawObs = 1;
-drawEdges = 1;
-drawRates = 1;
-
-rateCoeffs.dist = .9999*h;
-rateCoeffs.alpha = 0;
-rateCoeffs.K1 = [];
-rateCoeffs.K2 = [];
-geometry.dim = dim;
-geometry.m = m;
-geometry.obRad = obRad;
-geometry.diagJumps = diagJumps;
-geometry.ctr = ctr;
-geometry.specialSetting_m2 = specialSetting_m2;
 
 % regular
-geometry.name = 'square';
-geometry.rateCoeffs = rateCoeffs;
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
 abs(results.Deff - .7431)
 
-% bonding
-rateCoeffs.delta = .5;
-geometry.name = 'squareBonding';
-geometry.rateCoeffs = rateCoeffs;
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
+% bonding
+latticeGeo.specialSetting = 'bdyBonding';
+latticeGeo.obSlowdownFctr = 1/2;
+latticeGeo.bdyDist = .9999*latticeGeo.h;
+
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
 abs(results.Deff - .5245)
 
 % boundary attraction
-rateCoeffs.delta = 2;
-geometry.name = 'squareBdyAttract';
-geometry.rateCoeffs = rateCoeffs;
+latticeGeo.specialSetting = 'bdyAttract';
+latticeGeo.obSlowdownFctr = 1/2;
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
 abs(results.Deff - .7055)
 
 % boundary repel
-rateCoeffs.delta = 2;
-geometry.name = 'squareBdyRepel';
-geometry.rateCoeffs = rateCoeffs;
+latticeGeo.specialSetting = 'bdyRepel';
+latticeGeo.obSlowdownFctr = 1/2;
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
 abs(results.Deff - .6806)
 
+
 %% discrete
 
+mVals = 2.^[2:8];
 
 dim = 2;
+name = 'square';
 obRad = .25;
-ctr = [];
-specialSetting_m2 = [];
-
-load('Results/results_2d_square_2017_07_19_09_37_30.mat','results_homog');
-geometryName = 'square';
-mVals = 2.^[2:8];
+obCtr = [.5 .5];
 diagJumps = 0;
-
-rateCoeffs.alpha = 0;
-rateCoeffs.K1 = 0;
-rateCoeffs.K2 = 0;
-rateCoeffs.delta = 0;
+specialSetting = 'none';
+driftMult = 0;
+driftDecay = [];
+obSlowdownFctr = [];
+bdyDist = [];
 
 for i = 1:length(mVals)
     m = mVals(i);
     
-    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometryName,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
+    latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+    
+    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 
-    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],[]);
+    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
     results(i) = curRes;
        
 end
 
+load('Results/results_2d_square_2017_07_19_09_37_30.mat','results_homog');
 norm([results.Deff] - [results_homog.Deff])
 %% discrete with diag corrected
 
-load('Results_2d_square_diagJumpsCorrected/results_2017_08_13_18_38_51.mat','results_homog');
-
-%% discrete with diag
-
-
+mVals = 2.^[2:9];
 dim = 2;
+name = 'square';
 obRad = .25;
-ctr = [];
-specialSetting_m2 = [];
-
-load('Results_2d_square_diagJumps/results_2017_07_29_13_28_21.mat','results_homog');
-geometryName = 'square';
-mVals = 2.^[2:8];
-diagJumps = 1;
-
-rateCoeffs.alpha = 0;
-rateCoeffs.K1 = 0;
-rateCoeffs.K2 = 0;
-rateCoeffs.delta = 0;
+obCtr = [.5 .5];
+diagJumps = 2;
+specialSetting = 'none';
+driftMult = 0;
+driftDecay = [];
+obSlowdownFctr = [];
+bdyDist = [];
 
 for i = 1:length(mVals)
     m = mVals(i);
     
-    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometryName,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
+    latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+    
+    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 
-    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],[]);
+    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
     results(i) = curRes;
        
 end
 
+% to approximate this data, see comment in rate_lattice.m (i.e., make jump
+% rates along border scaled by 1.5 rather than 2)
+load('Results_2d_square_diagJumpsCorrected/results_2017_08_13_18_38_51.mat','results_homog');
+norm([results.Deff] - [results_homog.Deff])
+
+load('Results_2d_square_diagJumpsCorrected/results_2017_07_31_19_35_21.mat','results_homog');
+norm([results(1:7).Deff] - [results_homog.Deff])
+
+%% discrete with diag
+
+mVals = 2.^[2:8];
+
+dim = 2;
+name = 'square';
+obRad = .25;
+obCtr = [.5 .5];
+diagJumps = 1;
+specialSetting = 'none';
+driftMult = 0;
+driftDecay = [];
+obSlowdownFctr = [];
+bdyDist = [];
+
+for i = 1:length(mVals)
+    m = mVals(i);
+    
+    latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+    
+    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+
+    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
+
+    results(i) = curRes;
+       
+end
+
+load('Results_2d_square_diagJumps/results_2017_07_29_13_28_21.mat','results_homog');
 norm([results.Deff] - [results_homog.Deff])
 
 %% slowed rates at boundary
 
-dim = 2;
-obRad = .25;
-specialSetting_m2 = [];
-
-load('Results_2d_squareBdySlow/results_2017_08_14_12_49_25.mat','results_homog');
-geometryName = 'squareBdySlow';
 mVals = 2.^[2:9];
-diagJumps = 0;
 
-rateCoeffs.alpha = 0;
-rateCoeffs.K1 = 0;
-rateCoeffs.K2 = 0;
-rateCoeffs.delta = 2;
+dim = 2;
+name = 'square';
+obRad = .25;
+obCtr = [.5 .5];
+diagJumps = 0;
+specialSetting = 'bdySlow';
+driftMult = 0;
+driftDecay = [];
+obSlowdownFctr = 2;
+bdyDist = [];
 
 for i = 1:length(mVals)
     m = mVals(i);
     h = 1/m;
     
-    rateCoeffs.dist = .9999*h;
-    
-    ctr = .75 - .5*h;
+    obCtr = .75 - .5*h;
     obRadCorrected = obRad - .25*h;
+    bdyDist = .9999*h;
     
-    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometryName,obRadCorrected,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
+    latticeGeo = LatticeGeometry(dim, m, name, obRadCorrected, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+    
+    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 
-    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],[]);
+    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
     results(i) = curRes;
 
 end
 
+load('Results_2d_squareBdySlow/results_2017_08_14_12_49_25.mat','results_homog');
 norm([results.Deff] - [results_homog.Deff])
 
 %% slowed rates at boundary with diagonal jumps
-
 
 dim = 2;
 obRad = .25;
 specialSetting_m2 = [];
 
-load('Results_2d_squareBdySlow_diagJumps/results_2017_08_14_12_49_38.mat','results_homog');
 geometryName = 'squareBdySlow';
 mVals = 2.^[2:9];
 diagJumps = 1;
@@ -206,6 +231,7 @@ for i = 1:length(mVals)
 
 end
 
+load('Results_2d_squareBdySlow_diagJumps/results_2017_08_14_12_49_38.mat','results_homog');
 norm([results.Deff] - [results_homog.Deff])
 %% drift field
 

@@ -1,54 +1,55 @@
-function fh = drawCell(loc,nodes,edges,edgeRates,edgeJumps,geometryName,m,obRad,ctr,drawObs,drawEdges,drawRates,fh)
+function fh = drawCell(latticeGeo,nodes,edges,edgeRates,edgeJumps,loc,drawObs,drawEdges,drawRates,fh)
 
-dim = size(nodes,2);
-if nargin < 1 || isempty(loc)
+dim = latticeGeo.dim;
+
+if nargin < 6 || isempty(loc)
     loc = zeros(1,dim);
 end
-if nargin < 9 || isempty(ctr)
-    ctr = .5;
-end
-if nargin < 10 || isempty(drawObs)
+if nargin < 7 || isempty(drawObs)
     drawObs = 1;
 end
-if nargin < 11 || isempty(drawEdges)
+if nargin < 8 || isempty(drawEdges)
     drawEdges = 1;
 end
-if nargin < 12 || isempty(drawRates)
+if nargin < 9 || isempty(drawRates)
     drawRates = 0;
 end
-if nargin < 13 || isempty(fh)
+if nargin < 10 || isempty(fh)
     fh = figure;
 end
+
+m = latticeGeo.m;
+obCtr = latticeGeo.obCtr;
+obRad = latticeGeo.obRad;
+name = latticeGeo.name;
+nodeRad = 175*latticeGeo.h;
 
 figure(fh);
 hold on;
 
-h = 1/m;
-nodeRad = 175*h;
-
 if drawObs
     
     if dim == 2
-        if contains(geometryName,'circle')
+        if strcmpi(name,'circle')
             
-            cornerX = loc(1) + ctr - obRad;
-            cornerY = loc(2) + ctr - obRad;
+            cornerX = loc(1) + obCtr(1) - obRad;
+            cornerY = loc(2) + obCtr(2) - obRad;
             pos = [cornerX cornerY 2*obRad 2*obRad];
             rectangle(  'Position', pos,...
                         'facecolor','red',...
                         'Curvature',[1 1]);
 
-        elseif contains(geometryName,'square')
-            s = 2*obRad;
+        elseif strcmpi(name,'square')
+            sideLen = latticeGeo.sideLen;
 
-            cornerX = loc(1) + ctr - .5*s;
-            cornerY = loc(2) + ctr - .5*s;
+            cornerX = loc(1) + obCtr(1) - .5*sideLen;
+            cornerY = loc(2) + obCtr(2) - .5*sideLen;
 
-            rectangle('Position',[cornerX cornerY s s],'edgecolor','red','facecolor','red');
+            rectangle('Position',[cornerX cornerY sideLen sideLen],'edgecolor','red','facecolor','red');
         end
     elseif dim == 3
-        if contains(geometryName,'circle')
-            center = loc + .5;
+        if strcmpi(name,'circle')
+            center = loc + obCtr;
             
             [X,Y,Z] = sphere(100);
             X = X*obRad + center(1);
@@ -56,8 +57,8 @@ if drawObs
             Z = Z*obRad + center(3);
             surf(X,Y,Z,'facecolor','r','FaceAlpha',0.5,'FaceLighting','gouraud','EdgeColor','none');
             
-        elseif contains(geometryName,'square')
-            center = loc + [.5 .5 .5];
+        elseif strcmpi(name,'square')
+            center = loc + obCtr;
             sideLength = obRad*2;
             myDrawCube(center,sideLength,fh);
         end

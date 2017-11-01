@@ -40,18 +40,21 @@ end
 if ~strcmpi(specialSetting,'none')
     obSlowdownFctr = latticeGeo.obSlowdownFctr;
     bdyDist = latticeGeo.bdyDist;
-    relCoords = startNode - obCtr;
+    startNodeRel = startNode - obCtr;
+    endNodeRel = endNode - obCtr;
     
-    if strcmpi(name,'circle')
-        nodesInObs = find(sqrt(sum(relCoords.^2,2)) <= obRad);
-    elseif strcmpi(name,'square')
-        nodesInObs = find(all(abs(relCoords) < obRad,2));
+    if strcmpi(name,'circle')    
         
-        nodesAtBdy = all(abs(relCoords) < (obRad + bdyDist),2);
-        nodesNotAtBdy = ~nodesAtBdy;
+        edgeStartInObs = sqrt(sum(startNodeRel.^2,2)) <= obRad;
+        edgeEndInObs = sqrt(sum(endNodeRel.^2,2)) <= obRad;
+        
+    elseif strcmpi(name,'square')
 
-        nodesAtBdy = find(nodesAtBdy);
-        nodesNotAtBdy = find(nodesNotAtBdy);
+        edgeStartInObs = all(abs(startNodeRel) < obRad,2);
+        edgeEndInObs = all(abs(endNodeRel) < obRad,2);
+        
+        edgeStartInBdy = all(abs(startNodeRel) < (obRad + bdyDist),2);
+        edgeEndInBdy = all(abs(endNodeRel) < (obRad + bdyDist),2);
 
     end
     
@@ -59,68 +62,63 @@ end
 
 if strcmpi(specialSetting,'slowdown')
     % Slows all rates of edges starting or ending in square
-    slowedEdges = or(ismember(startNode,nodesInObs),ismember(endNode,nodesInObs));
-    acceleratedEdges = [];
     
-elseif strcmpi(name,'bdyBonding')
+    acceleratedEdges = [];
+    slowedEdges = edgeStartInObs | edgeEndInObs;
+    
+elseif strcmpi(specialSetting,'bdyBonding')
     % Slows all rates leaving nodes that are within dis
-    slowedEdges = ismember(startNode,nodesAtBdy);
+    
     acceleratedEdges = [];
+    slowedEdges = edgeStartInBdy;
     
-elseif strcmpi(name,'bdyRepel')
+elseif strcmpi(specialSetting,'bdyRepel')
     % Slows all rates from nodes at boundary to nodes not at boundary
-    acceleratedEdges = ismember(startNode,nodesAtBdy) & ismember(endNode,nodesNotAtBdy);
-    slowedEdges = ismember(startNode,nodesNotAtBdy) & ismember(endNode,nodesAtBdy);
     
-elseif strcmpi(name,'bdyAttract')
+    acceleratedEdges = edgeStartInBdy | ~edgeEndInBdy;
+    slowedEdges = ~edgeStartInBdy | edgeEndInBdy;
+    
+elseif strcmpi(specialSetting,'bdyAttract')
     % Increase all rates from nodes not at boundary to nodes at boundary
-    acceleratedEdges = ismember(startNode,nodesNotAtBdy) & ismember(endNode,nodesAtBdy);
-    slowedEdges = ismember(startNode,nodesAtBdy) & ismember(endNode,nodesNotAtBdy);
     
-elseif strcmpi(name,'bdySlow')
+    acceleratedEdges = ~edgeStartInBdy | edgeEndInBdy;
+    slowedEdges = edgeStartInBdy | ~edgeEndInBdy;
+    
+elseif strcmpi(specialSetting,'bdySlow')
     % Slow all rates from boundary node to boundary node.
     % Meant to simulate nodes sitting on obstruction boundary.
     
     trueObRad = obRad + .25*h;
-    relCoords = startNode - obCtr;
-    nodesAtBdy = all(abs(relCoords) < (obRad + bdyDist),2);
-    nodesNotAtBdy = ~nodesAtBdy;
-    nodesAtCorner = all(abs(abs(relCoords) - trueObRad) < 1e-10,2);
     
-    nodesAtBdy = find(nodesAtBdy);
-    nodesNotAtBdy = find(nodesNotAtBdy);
-    nodesAtCorner = find(nodesAtCorner);
+    edgeStartInBdy = all(abs(startNodeRel) < (trueObRad + bdyDist),2); % old code used obRad, not trueObRad
+    edgeEndInBdy = all(abs(endNodeRel) < (trueObRad + bdyDist),2); % old code used obRad, not trueObRad
+    edgeStartAtCorner = all(abs(abs(startNodeRel) - trueObRad) < 1e-10,2);
     
-    % this line might be unused. check old version
-    acceleratedEdges = ismember(startNode,nodesAtBdy) & ismember(endNode,nodesNotAtBdy) & ~ismember(startNode,nodesAtCorner);
-
-end
-
-if ~strcmpi(specialSetting,'bdySlow')
-    rate(slowedEdges) = rate(slowedEdges)/obSlowdownFctr;
-    rate(acceleratedEdges) = rate(acceleratedEdges)*obSlowdownFctr;
-end
+    acceleratedEdges = [];
+    slowedEdges = edgeStartInBdy & ~edgeEndInBdy & ~edgeStartAtCorner;
     
-% need to do some surgery here because squareBdySlow is using a hack to work.
-if diagJumps > 0 && strcmpi(specialSetting,'bdySlow')
-    warning('squareBdySlow geometry with diagonal jumps may not work as intended.');
-    validInds = rate > 0;
-    startNode = startNode(validInds);
-    endNode = endNode(validInds);
-    rate = rate(validInds);
-    edges = [startNode,endNode];
-    edgeJumps = startNode(edges(:,2),:) - startNode(edges(:,1),:);
-    inds = abs(edgeJumps) > .5;
-    edgeJumps(inds) = edgeJumps(inds) - sign(edgeJumps(inds));
+    % need to do some surgery here because squareBdySlow is using a hack to work.
+    if diagJumps > 0
+        warning('squareBdySlow geometry with diagonal jumps may not work as intended.');
 
-    diagJumps = ismembertol(abs(edgeJumps),[h,h],1e-10,'byrows',1);
-    bdyJumps = ismember(edges(:,1),nodesAtBdy) & ismember(edges(:,2),nodesAtBdy);
-    rate(diagJumps & bdyJumps) = 0;
+        edgeJumps = endNode - startNode;
+        inds = abs(edgeJumps) > .5;
+        edgeJumps(inds) = edgeJumps(inds) - sign(edgeJumps(inds));
 
-    diagJumpsFromBdy = ismember(startNode,nodesAtBdy) & ismember(endNode,nodesNotAtBdy) & diagJumps;
-    rate(diagJumpsFromBdy) = rate(diagJumpsFromBdy)/obSlowdownFctr;
-end
+        diagJumps = ismembertol(abs(edgeJumps),[h,h],1e-10,'byrows',1);
+        bdyJumps = edgeStartInBdy & edgeEndInBdy;
+        rate(diagJumps & bdyJumps) = 0;
+
+        slowedEdges = slowedEdges | (edgeStartInBdy & ~edgeEndInBdy & diagJumps);
         
+    end
+end
+
+if ~strcmpi(specialSetting,'none')
+    rate(slowedEdges) = rate(slowedEdges)*obSlowdownFctr;
+    rate(acceleratedEdges) = rate(acceleratedEdges)/obSlowdownFctr;
+end
+
 end
 
 function val = drift(x,obCtr,obRad,driftMult,driftDecay)
@@ -166,14 +164,14 @@ function val = correctDiag(val,lambda,x,y,h,sideLen)
     lowerLeftBlocked =  isBlocked(x + h*[-1 -1]);
 
     case1a = rightJump & ((upperRightBlocked & upperBlocked) | (lowerRightBlocked & lowerBlocked));
-    val(case1a & border) = 2*lambda;
+    val(case1a & border) = 2*lambda; % change this to 1.5*lambda for a different but reasonable approach
     case1b = upperJump & ((upperRightBlocked & rightBlocked) | (upperLeftBlocked & leftBlocked));
-    val(case1b & border) = 2*lambda;
+    val(case1b & border) = 2*lambda; % change this to 1.5*lambda for a different but reasonable approach
 
     case2a = leftJump & ((upperLeftBlocked & upperBlocked) | (lowerLeftBlocked & lowerBlocked));
-    val(case2a & border) = 2*lambda;
+    val(case2a & border) = 2*lambda; % change this to 1.5*lambda for a different but reasonable approach
     case2b = lowerJump & ((lowerRightBlocked & rightBlocked) | (lowerLeftBlocked & leftBlocked));
-    val(case2b & border) = 2*lambda;
+    val(case2b & border) = 2*lambda; % change this to 1.5*lambda for a different but reasonable approach
 
     case3a = (upperJump | rightJump) & upperRightBlocked & ~upperBlocked & ~rightBlocked ;
     val(case3a & border) = 1.5*lambda;

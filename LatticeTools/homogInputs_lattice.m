@@ -22,6 +22,10 @@ tic
 freeInds = nodeInds > 0;
 nFree = sum(freeInds(:));
 
+dim = latticeGeo.dim;
+m = latticeGeo.m;
+diagJumps = latticeGeo.diagJumps;
+
 if dim == 2
     nbrShifts = [ 1  0; -1  0;...
                   0  1;  0 -1 ];

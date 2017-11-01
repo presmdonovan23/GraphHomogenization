@@ -1,14 +1,15 @@
-function [nodes, isFree] = getNodes_lattice( R, m, dim, geometryName, ctr )
+function [nodes, isFree] = getNodes_lattice( latticeGeo )
 % assumes nodes live on lattice
 % assumes cell has length 1
 tic
 
-if nargin < 4
-    geometryName = 'circle';
-end
-if nargin < 5
-    ctr = .5;
-end
+dim = latticeGeo.dim;
+m = latticeGeo.m;
+h = latticeGeo.h;
+obRad = latticeGeo.obRad;
+name = latticeGeo.name;
+obCtr = latticeGeo.obCtr;
+specialSetting = latticeGeo.specialSetting;
 
 sz = [m*ones(1,dim) dim];
 nodes = zeros(sz);
@@ -27,32 +28,28 @@ for i = 1:dim
     end
 end
 % shift/scale sites to live on [0,1]^d
-nodes = (nodes-.5)*(1/m);
+nodes = (nodes - .5)*h;
 
-if R == 0
+if obRad == 0
     mDim = m*ones(1,dim);
     isFree = true(mDim);
 else
-    if strcmpi(geometryName,'circle')
-        dist2ctr2 = sum((nodes-ctr).^2,dim+1);
+    if strcmpi(name,'circle')
+        dist2ctr2 = sum((nodes-obCtr).^2,dim+1);
         dist2ctr2 = round(dist2ctr2,m); % eliminate numerical error that could make obstructed sites non-symmetrical
-        isFree = dist2ctr2 > R^2;
-    elseif strcmpi(geometryName,'square') || ...
-            strcmpi(geometryName,'squareBonding') || ...
-            strcmpi(geometryName,'squareBdyAttract') || ...
-            strcmpi(geometryName,'squareBdyRepel') || ...
-            strcmpi(geometryName,'squareBdySlow')
+        isFree = dist2ctr2 > obRad^2;
+    elseif strcmpi(name,'square') && ~strcmpi(specialSetting,'slowdown')
         % ** could be some numerical error for small m where sites are on boundary of obstructed region
-        if dim == 2
-            isFree = ~and(abs(nodes(:,:,1)-ctr) <= R, abs(nodes(:,:,2)-ctr) <= R);
-        elseif dim == 3
-            isFree = ~and(abs(nodes(:,:,:,1)-ctr) <= R, and(abs(nodes(:,:,:,2)-ctr) <= R,abs(nodes(:,:,:,3)-ctr) <= R));
-        end
-    elseif strcmpi(geometryName,'squareSlowdown')
+        obCtr3(1,1,:) = obCtr;
+        isFree = ~all(abs(nodes - obCtr3) <= obRad,3);
+        %if dim == 2
+        %    isFree = ~and(abs(nodes(:,:,1)-obCtr) <= obRad, abs(nodes(:,:,2)-obCtr) <= obRad);
+        %elseif dim == 3
+        %    isFree = ~and(abs(nodes(:,:,:,1)-obCtr) <= obRad, and(abs(nodes(:,:,:,2)-obCtr) <= obRad,abs(nodes(:,:,:,3)-obCtr) <= obRad));
+        %end
+    elseif strcmpi(name,'square') && ~strcmpi(specialSetting,'slowdown')
         mDim = m*ones(1,dim);
         isFree = true(mDim);
-    else
-        error('Geometry must be circle or square.');
     end
 end
 
