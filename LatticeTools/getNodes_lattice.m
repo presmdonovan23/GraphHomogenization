@@ -11,7 +11,11 @@ name = latticeGeo.name;
 obCtr = latticeGeo.obCtr;
 specialSetting = latticeGeo.specialSetting;
 
-obCtr3(1,1,:) = obCtr;
+if dim == 2
+    obCtr3(1,1,:) = obCtr;
+elseif dim == 3
+    obCtr3(1,1,1,:) = obCtr;
+end
 
 sz = [m*ones(1,dim) dim];
 nodes = zeros(sz);
@@ -42,13 +46,8 @@ else
         isFree = dist2ctr2 > obRad^2;
     elseif strcmpi(name,'square') && ~strcmpi(specialSetting,'slowdown')
         % ** could be some numerical error for small m where sites are on boundary of obstructed region
+        isFree = ~all(abs(nodes - obCtr3) <= obRad,dim+1);
         
-        isFree = ~all(abs(nodes - obCtr3) <= obRad,3);
-        %if dim == 2
-        %    isFree = ~and(abs(nodes(:,:,1)-obCtr) <= obRad, abs(nodes(:,:,2)-obCtr) <= obRad);
-        %elseif dim == 3
-        %    isFree = ~and(abs(nodes(:,:,:,1)-obCtr) <= obRad, and(abs(nodes(:,:,:,2)-obCtr) <= obRad,abs(nodes(:,:,:,3)-obCtr) <= obRad));
-        %end
     elseif strcmpi(name,'square') && ~strcmpi(specialSetting,'slowdown')
         mDim = m*ones(1,dim);
         isFree = true(mDim);
