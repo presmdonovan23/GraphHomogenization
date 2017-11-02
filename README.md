@@ -22,16 +22,23 @@ A set of functions for computing the effective diffusivity via homogenization th
 
 ### GraphHomogenization/LatticeTools/
 A set of functions for setting up the graph's node set, edge set, and edge weights assuming the graph satisfies certain geometric conditions.
-- **homogInputs_lattice.m** Sets up the node set, edge set, and edge weights.
-- **rate_lattice.m** Computes the rate of an edge when the rate function is of a certain form.
+- **getNodes_lattice.m** Calculates the set of free nodes from a LatticeGeometry object.
+- **homogInputs_lattice.m** Sets up the rate matrix, node set, edge set, edge weights, and edge jumps of a LatticeGeometry object. Calls getNodes_lattice.
+- **LatticeGeometry.m** A class that holds the defining features of a lattice geometry. Can also be used to check that a lattice geometry is valid.
+- **rate_lattice.m** Computes the rate of an edge given a LatticeGeometry object.
 
 ### GraphHomogenization/MiscTools/
 - **checkDetailedBalance.m** Determines whether a graph satisfies the detailed balance condition.
+- **diagnostics.m** A script for ensuring that code changes do not lead to different/inaccurate results.
 - **saveResults.m** Saves a results object.
 
+### GraphHomogenization/MiscDrivers/
+Some drivers specific to my research.
+
 ### GraphHomogenization/PlottingTools/
-A set of functions for drawing various graph poperties and plotting the effective diffusivities.
+A set of functions for drawing various graph properties and plotting the effective diffusivities.
 - **drawCell.m** Draws a periodic cell of the graph.
 - **drawCell_lattice.m** Draws a periodic cell of the graph assuming the graph satisfies certain geometric conditions.
 - **drawDriftField.m** Draws a vector field based on the drift function.
 - **plotObRadVsEffDiff.m** Plots the effective diffusivities computed by homogenization theory and Monte Carlo simulation against obstruction radius.
+
