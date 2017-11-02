@@ -4,113 +4,77 @@
 %   3) attraction at boundary
 %   4) repulsion at boundary
 
+plotOn = 1;
 saveOn = 0;
-obRad = .25;
+
+% geometry
+dim = 2;
 m = 8;
 h = 1/m;
-dim = 2;
+name = 'square';
+obRad = .25;
+obCtr = [.5 .5];
+diagJumps = 0;
+driftMult = 0;
+driftDecay = [];
 
-diagJumps = 0; % diagJumps = 2 => corrected diagonal jumps
-ctr = .5;
-specialSetting_m2 = 'none';
+% neutral
+specialSetting = 'none';
+obSlowdownFctr = [];
+bdyDist = [];
 
-startNodeInd = 1;
-numTraj = 0;
-plotOn = 1;
-drawObs = 1;
-drawEdges = 1;
-drawRates = 1;
+latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+            
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
-rateCoeffs.dist = .9999*h;
-rateCoeffs.alpha = 0;
-rateCoeffs.K1 = [];
-rateCoeffs.K2 = [];
-geometry.dim = dim;
-geometry.m = m;
-geometry.obRad = obRad;
-geometry.diagJumps = diagJumps;
-geometry.ctr = ctr;
-geometry.specialSetting_m2 = specialSetting_m2;
-
-%% regular
-geometry.name = 'square';
-geometry.rateCoeffs = rateCoeffs;
-
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
-
-if plotOn
-    
-    drawEdges = 1;
-    drawObs = 1;
-    drawRates = 0;
-    
-    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,obRad,ctr,drawObs,drawEdges,drawRates,[]);
-    
-end
 if saveOn
-    filename{1} = saveResults(results);
+    saveresults(results);
 end
+% boundary bonding
+specialSetting = 'bdyBonding';
+obSlowdownFctr = 1/2;
+bdyDist = .9999*h;
 
-%% bonding
-rateCoeffs.delta = .5;
-geometry.name = 'squareBonding';
-geometry.rateCoeffs = rateCoeffs;
+latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+            
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
-
-if plotOn
-
-    drawEdges = 1;
-    drawObs = 1;
-    drawRates = 0;
-    
-    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,obRad,ctr,drawObs,drawEdges,drawRates,[]);
-    
-end
 if saveOn
-    filename{2} = saveResults(results);
+    saveresults(results);
 end
+% boundary attraction
+specialSetting = 'bdyAttract';
+obSlowdownFctr = 1/2;
+bdyDist = .9999*h;
 
-%% boundary attraction
-rateCoeffs.delta = 2;
-geometry.name = 'squareBdyAttract';
-geometry.rateCoeffs = rateCoeffs;
+latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+            
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
-
-if plotOn
-    
-    drawEdges = 1;
-    drawObs = 1;
-    drawRates = 0;
-    
-    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,obRad,ctr,drawObs,drawEdges,drawRates,[]);
-    
-end
 if saveOn
-    filename{3} = saveResults(results);
+    saveresults(results);
 end
+% boundary attraction
+specialSetting = 'bdyRepel';
+obSlowdownFctr = 1/2;
+bdyDist = .9999*h;
 
-%% boundary repel
-rateCoeffs.delta = 2;
-geometry.name = 'squareBdyRepel';
-geometry.rateCoeffs = rateCoeffs;
+latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+                obCtr, diagJumps, specialSetting, ...
+                driftMult, driftDecay, obSlowdownFctr, bdyDist);
+            
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
-
-if plotOn
-    
-    drawEdges = 1;
-    drawObs = 1;
-    drawRates = 0;
-    
-    drawCell([],nodes,edges,edgeRates,edgeJumps,geometry.name,m,obRad,ctr,drawObs,drawEdges,drawRates,[]);
-    
-end
 if saveOn
-    filename{4} = saveResults(results);
+    saveresults(results);
 end

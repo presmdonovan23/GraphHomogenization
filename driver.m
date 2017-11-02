@@ -1,40 +1,32 @@
 %% A simple driver
 plotOn = 1;
+saveOn = 0;
 
 % geometry parameters
 dim = 2;
-geometryName = 'circle';
-obRad = .25;
 m = 5;
-diagJumps = 0; % diagJumps = 2 => corrected diagonal jumps
-obCtr = .5;
-specialSetting_m2 = 'none';
+name = 'circle';
+obRad = .25;
+obCtr = [.5 .5];
+diagJumps = 0;
+specialSetting = 'none';
+driftMult = 0;
+driftDecay = [];
+obSlowdownFctr = [];
+bdyDist = [];
 
 % monte carlo parameters
 startNodeInd = 1;
 numTraj = 100;
 
-% rate parameters
-alpha = 0;
-K1 = 25;
-K2 = 10;
-delta = 1.5;
-rateCoeffs.alpha = alpha;
-rateCoeffs.K1 = 25;
-rateCoeffs.K2 = 10;
-rateCoeffs.delta = delta;
+latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+            obCtr, diagJumps, specialSetting, ...
+            driftMult, driftDecay, obSlowdownFctr, bdyDist);
 
-geometry.dim = dim;
-geometry.name = geometryName;
-geometry.m = m;
-geometry.obRad = obRad;
-geometry.diagJumps = diagJumps;
-geometry.ctr = obCtr;
-geometry.specialSetting_m2 = specialSetting_m2;
-geometry.rateCoeffs = rateCoeffs;
-        
-[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(...
-    dim,geometryName,obRad,m);
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 
-results = effDiff(L,nodes,edges,edgeRates,edgeJumps,...
-                    numTraj,startNodeInd,geometry);
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,numTraj,startNodeInd,latticeGeo);
+                
+if saveOn
+    saveResults(results);
+end
