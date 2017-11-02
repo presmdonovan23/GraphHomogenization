@@ -168,13 +168,11 @@ mVals = 2.^[2:9];
 dim = 2;
 name = 'square';
 obRad = .25;
-obCtr = [.5 .5];
 diagJumps = 0;
 specialSetting = 'bdySlow';
 driftMult = 0;
 driftDecay = [];
 obSlowdownFctr = 2;
-bdyDist = [];
 
 for i = 1:length(mVals)
     m = mVals(i);
@@ -199,40 +197,9 @@ end
 load('Results_2d_squareBdySlow/results_2017_08_14_12_49_25.mat','results_homog');
 norm([results.Deff] - [results_homog.Deff])
 
-%% slowed rates at boundary with diagonal jumps (still working on agreement)
-%{
-dim = 2;
-obRad = .25;
-specialSetting_m2 = [];
+%% slowed rates at boundary with diagonal jumps
 
-geometryName = 'squareBdySlow';
 mVals = 2.^[2:9];
-diagJumps = 1;
-
-rateCoeffs.alpha = 0;
-rateCoeffs.K1 = 0;
-rateCoeffs.K2 = 0;
-rateCoeffs.delta = 2;
-
-for i = 1:length(mVals)
-    m = mVals(i);
-    h = 1/m;
-    
-    rateCoeffs.dist = .9999*h;
-    
-    ctr = .75 - .5*h;
-    obRadCorrected = obRad - .25*h;
-    
-    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometryName,obRadCorrected,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-
-    curRes = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],[]);
-
-    results(i) = curRes;
-
-end
-%}
-mVals = 2.^[2:9];
-mVals = 4;
 dim = 2;
 name = 'square';
 obRad = .25;

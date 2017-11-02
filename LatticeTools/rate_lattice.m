@@ -110,7 +110,7 @@ elseif strcmpi(specialSetting,'bdySlow')
         bdyJumps = edgeStartInBdy & edgeEndInBdy;
         rate(diagJumps & bdyJumps) = 0;
 
-        slowedEdges = slowedEdges | (edgeStartInBdy & ~edgeEndInBdy & diagJumps);
+        acceleratedEdges = edgeStartInBdy & ~edgeEndInBdy & diagJumps;
         
     end
 end
