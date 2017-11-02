@@ -1,5 +1,7 @@
 function results = effDiff_homog(L,nodes,edges,edgeRates,edgeJumps)
 
+fprintf('Homogenization theory:\n');
+
 % get LU factors
 [LTFactors, LUtime] = LUFull(L');
 % solve for stationary distribution

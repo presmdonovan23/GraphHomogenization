@@ -62,6 +62,6 @@ nodes = reshape(nodes,m^dim,dim);
 nodes = nodes(isFree(:) > 0,:);
 
 time = toc;
-fprintf('Calculated available sites in %.1f seconds.\n',time);
+fprintf('\tCalculated available sites in %.1f seconds.\n',time);
 
 end

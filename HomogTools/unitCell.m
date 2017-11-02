@@ -89,7 +89,7 @@ if any(relRes > TOL)
 end
 
 time = toc;
-fprintf('Calculated unit-cell solution in %.1f seconds.\n',time);
+fprintf('\tCalculated unit-cell solution in %.1f seconds.\n',time);
     
 end
 

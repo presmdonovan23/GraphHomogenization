@@ -3,6 +3,13 @@ function results = effDiff(L,nodes,edges,edgeRates,edgeJumps,numTraj,startNodeIn
 if nargin < 6 || isempty(numTraj)
     numTraj = 0;
 end
+if nargin < 7 || isempty(startNodeInd)
+    if numTraj == 0
+        startNodeInd = [];
+    else
+        startNodeInd = 1;
+    end
+end
 if nargin < 8
     geometry = [];
 end

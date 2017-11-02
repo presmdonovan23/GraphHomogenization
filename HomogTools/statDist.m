@@ -55,6 +55,6 @@ if relRes > TOL
 end
 
 time = toc;
-fprintf('Calculated stationary distribution in %.1f seconds.\n',time);
+fprintf('\tCalculated stationary distribution in %.1f seconds.\n',time);
 
 end

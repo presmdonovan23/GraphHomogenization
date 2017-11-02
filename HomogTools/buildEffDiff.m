@@ -36,6 +36,6 @@ term2 = -.5*(term2 + term2');
 Deff = term1 + term2;
 
 time = toc;
-fprintf('Set up effective diffusivity matrix in %.1f seconds.\n',time);
+fprintf('\tSet up effective diffusivity matrix in %.1f seconds.\n',time);
 
 end

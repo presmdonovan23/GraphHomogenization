@@ -51,7 +51,7 @@ tmax = 25;
 timeRec = linspace(0,tmax,numTimeRec);
 locInterp = zeros(numTraj,dim,numTimeRec);
 
-
+fprintf('Monte Carlo (%d simulations):\n',numTraj);
 for p = 1:100
     for i = (1+(p-1)*numTraj/100):(p*numTraj/100)
         
@@ -64,14 +64,15 @@ for p = 1:100
         
     end
     
+    if mod(p,10) == 1
+        fprintf('\t');
+    end
     fprintf('%d%%,',p)
     if mod(p,10) == 0
         fprintf('\n');
     end
     
 end
-
-fprintf('\n');
 
 sdInterp = squeeze(sum((locInterp - nodes(startNodeInd,:)).^2,2));
 MSD = mean(sdInterp,1);
@@ -108,7 +109,7 @@ if plotOn
     ylabel('SD')
 end
 
-fprintf('Finished %d Monte Carlo simulations in %.2f seconds.\n',numTraj, time);
+fprintf('\tFinished %d Monte Carlo simulations in %.2f seconds.\n',numTraj, time);
 
 end
 
