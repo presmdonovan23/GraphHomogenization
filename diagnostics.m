@@ -130,8 +130,7 @@ latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
 [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
-abs(results.Deff - .7431)
-
+abs(results.Deff - .743103104943094)
 
 % bonding
 latticeGeo.specialSetting = 'bdyBonding';
@@ -141,7 +140,7 @@ latticeGeo.bdyDist = .9999*latticeGeo.h;
 [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
-abs(results.Deff - .5245)
+abs(results.Deff - .524543368195125)
 
 % boundary attraction
 latticeGeo.specialSetting = 'bdyAttract';
@@ -150,7 +149,7 @@ latticeGeo.obSlowdownFctr = 1/2;
 [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
-abs(results.Deff - .7055)
+abs(results.Deff - .705490976286049)
 
 % boundary repel
 latticeGeo.specialSetting = 'bdyRepel';
@@ -159,8 +158,7 @@ latticeGeo.obSlowdownFctr = 1/2;
 [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 
-abs(results.Deff - .6806)
-
+abs(results.Deff - .680616147421872)
 
 %% none (square)
 
