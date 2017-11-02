@@ -121,6 +121,9 @@ classdef LatticeGeometry < handle
             if length(obCtr) == 1
                 obCtr = obCtr*ones(1,dim);
             end
+            if length(obCtr) ~= dim
+                error('obCtr must be a scalar or have correct dimension.')
+            end
             
             this.dim = dim;
             this.m = m;
