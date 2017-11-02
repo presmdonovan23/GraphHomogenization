@@ -232,17 +232,15 @@ for i = 1:length(mVals)
 end
 %}
 mVals = 2.^[2:9];
-mVals = 8;
+mVals = 4;
 dim = 2;
 name = 'square';
 obRad = .25;
-obCtr = [.5 .5];
 diagJumps = 1;
 specialSetting = 'bdySlow';
 driftMult = 0;
 driftDecay = [];
 obSlowdownFctr = 2;
-bdyDist = [];
 
 for i = 1:length(mVals)
     m = mVals(i);
@@ -266,52 +264,7 @@ end
 
 load('Results_2d_squareBdySlow_diagJumps/results_2017_08_14_12_49_38.mat','results_homog');
 norm([results.Deff] - [results_homog.Deff])
-%% drift field (still working on agreement)
-
-%{
-clear results
-
-saveOn = 0;
-obRads = (.05:.05:.45);
-m = 64;
-h = 1/m;
-dim = 2;
-
-diagJumps = 0; % diagJumps = 2 => corrected diagonal jumps
-ctr = .5;
-specialSetting_m2 = 'none';
-
-startNodeInd = 1;
-numTraj = 0;
-plotOn = 0;
-drawObs = 1;
-drawEdges = 1;
-drawRates = 1;
-
-rateCoeffs.dist = .9999*h;
-rateCoeffs.alpha = 1;
-rateCoeffs.K1 = 25;
-rateCoeffs.K2 = 10;
-geometry.dim = dim;
-geometry.m = m;
-
-geometry.diagJumps = diagJumps;
-geometry.ctr = ctr;
-geometry.specialSetting_m2 = specialSetting_m2;
-
-geometry.name = 'circle';
-geometry.rateCoeffs = rateCoeffs;
-
-for i = 1:length(obRads)
-    obRad = obRads(i);
-    geometry.obRad = obRad;
-    
-    [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(dim,geometry.name,obRad,m,rateCoeffs,diagJumps,ctr,specialSetting_m2);
-    
-    results(i) = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],geometry);
-    
-end
-%}
+%% drift field
 
 m = 64;
 dim = 2;
@@ -341,7 +294,7 @@ for i = 1:length(obRadVals)
 end
 
 results_orig = load('Results/results_2d_circle_m64_alpha1_noapprox.mat');
-results_orig = [results_orig.Deffres];
+results_orig = [results_orig.results.Deffres];
 Deff_orig = [results_orig.Deff_homog];
 Deff_orig = Deff_orig(1,1:2:end);
 norm([results.Deff] - Deff_orig)

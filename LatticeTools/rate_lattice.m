@@ -30,11 +30,12 @@ else % no diagonal jumps. all jumps along basis vectors
     
     jump = (abs(endNode - startNode) > 1e-12).*sign(endNode - startNode); % only 1 component will be nonzero
     mu = drift(startNode,obCtr,obRad,driftMult,driftDecay);
-    
+        
     d = sum(jump.*mu,2);  % contains the x,y, or z component of drift
     
-    rate = lambda + driftMult*d/(2*h);
+    rate = lambda + d/(2*h);
     %rate = lambda*exp(driftMult*2*h*d);
+
 end
 
 if ~strcmpi(specialSetting,'none')
