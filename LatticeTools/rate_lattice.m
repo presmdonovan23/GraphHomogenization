@@ -12,6 +12,7 @@ obRad = latticeGeo.obRad;
 driftMult = latticeGeo.driftMult;
 driftDecay = latticeGeo.driftDecay;
 specialSetting = latticeGeo.specialSetting;
+bdyDist = latticeGeo.bdyDist;
 
 if diagJumps == 0
     lambda = 1/h^2;
@@ -38,7 +39,7 @@ else % no diagonal jumps. all jumps along basis vectors
 
 end
 
-if ~strcmpi(specialSetting,'none')
+if ~strcmpi(specialSetting,'none') && ~isempty(bdyDist)
     obSlowdownFctr = latticeGeo.obSlowdownFctr;
     bdyDist = latticeGeo.bdyDist;
     startNodeRel = startNode - obCtr;
@@ -115,7 +116,7 @@ elseif strcmpi(specialSetting,'bdySlow')
     end
 end
 
-if ~strcmpi(specialSetting,'none')
+if ~strcmpi(specialSetting,'none') && ~isempty(bdyDist)
     rate(slowedEdges) = rate(slowedEdges)*obSlowdownFctr;
     rate(acceleratedEdges) = rate(acceleratedEdges)/obSlowdownFctr;
 end
