@@ -1,5 +1,6 @@
 function [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo)
 
+fprintf('Input setup (lattice):\n')
 if ~isa(latticeGeo,'LatticeGeometry')
     error('Must supply a LatticeGeometry object.');
 end
@@ -102,12 +103,13 @@ inds = abs(edgeJumps) > .5;
 edgeJumps(inds) = edgeJumps(inds) - sign(edgeJumps(inds));
 
 %%
-if m == 2 && ~strcmpi(specialSetting_m2,'none')
+specialSetting = latticeGeo.specialSetting;
+if m == 2 && ~strcmpi(specialSetting,'none')
     
     edgeJumps(5:8,:) = -edgeJumps(5:8,:);
     edgeJumps(13:16,:) = -edgeJumps(13:16,:);
 
-    if strcmpi(specialSetting_m2,'blockOneSite')
+    if strcmpi(specialSetting,'m2_blockOneSite')
         edgesToRemove = or(edges(:,1) == 4, edges(:,2) == 4);
 
         edges(edgesToRemove,:) = [];
@@ -115,16 +117,15 @@ if m == 2 && ~strcmpi(specialSetting_m2,'none')
         edgeRates(edgesToRemove) = [];
         nodes(4,:) = [];
         
-    elseif strcmpi(specialSetting_m2,'slowOneSite')
+    elseif strcmpi(specialSetting,'m2_slowOneSite')
         edgesToSlow = or(edges(:,1) == 4, edges(:,2) == 4);
-        delta = rateCoeffs.delta;
-        edgeRates(edgesToSlow) = delta*edgeRates(edgesToSlow);
+        edgeRates(edgesToSlow) = latticeGeo.obSlowdownFctr*edgeRates(edgesToSlow);
     end
     L = sparse(edges(:,1),edges(:,2),edgeRates);
     L = L - diag(sum(L,2));
 end
 %%
 time = toc;
-fprintf('Calculated rate matrix in %.1f seconds.\n',time);
+fprintf('\tCalculated rate matrix in %.1f seconds.\n',time);
 
 end
