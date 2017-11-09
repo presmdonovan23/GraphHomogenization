@@ -119,8 +119,22 @@ If the jump rate function $\lambda$ is constant, then setting up a \texttt{Latti
 
 The function \texttt{validate} determines whether or not a \texttt{LatticeGeometry} object is valid. For example, this function checks that the dimension is 2 or 3. We now provide in-depth descriptions of the more complicated fields of the \texttt{LatticeGeometry} class.
 
+\subsection{\texttt{dim}, \texttt{m}, \texttt{name}, \texttt{obRad}, and \texttt{obCtr}}
+These fields determine the quotient node set $\oS$. Recall that \texttt{h} = 1/\texttt{m}. Then
+\begin{equation}
+\oS = \texttt{h} \integ^{\texttt{dim}} \backslash \mathcal{O}
+\end{equation}
+where $\mathcal{O}$ is an obstructed region that also depends on these fields. If \texttt{name} = `circle', then
+\begin{equation*}
+\mathcal{O} = \{x \in [0,1]^{\texttt{dim}} \;|\; ||x - \texttt{obCtr}||_2 \leq \texttt{obRad}\}.
+\end{equation*}
+If \texttt{name} = `square', then
+\begin{equation*}
+\mathcal{O} = \{x \in [0,1]^{\texttt{dim}} \;|\; ||x - \texttt{obCtr}||_{\infty} \leq \texttt{obRad}\}.
+\end{equation*}
+
 \subsection{\texttt{diagJumps}}
-A ``diagonal jump'' refers to any edge $e$ where $|\nu_e| = (h,h)$ (in $2D$) or $|\nu_e| = (h,h,h)$ (in $3D$). If only jumps along the standard basis vectors are desired, set \texttt{diagJumps} = 0. Otherwise, set \texttt{diagJumps} = 1 to incorporate diagonal jumps in a naive and straightforward manner.
+This field determines the edge set $\oE$. A ``diagonal jump'' refers to any edge $e$ where $|\nu_e| = (h,h)$ (in $2D$) or $|\nu_e| = (h,h,h)$ (in $3D$). If only jumps along the standard basis vectors are desired, set \texttt{diagJumps} = 0. Otherwise, set \texttt{diagJumps} = 1 to incorporate diagonal jumps in a naive and straightforward manner.
 
 The downside to this setting is that the diagonal jump rates may not be realistic. For example, if the random walker is near the obstruction boundary (its distance to the obstruction is less than $h$) and it attempts a diagonal jump to a site that is obstructed, the jump would have resulted in a displacement. Setting \texttt{diagJumps} = 2 accounts for this but is only implemented for the case when \texttt{dim} = 2 and \texttt{name} = `square'.
 
