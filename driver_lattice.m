@@ -1,5 +1,5 @@
 % misc
-saveOn = 1;
+saveOn = 0;
 plotOn = 1;
 
 % geometry

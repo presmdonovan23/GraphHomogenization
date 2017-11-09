@@ -12,7 +12,12 @@ obRad = latticeGeo.obRad;
 driftMult = latticeGeo.driftMult;
 driftDecay = latticeGeo.driftDecay;
 specialSetting = latticeGeo.specialSetting;
+obSlowdownFctr = latticeGeo.obSlowdownFctr;
 bdyDist = latticeGeo.bdyDist;
+
+if strcmpi(specialSetting,'bdySlow')
+    obSlowdownFctr = 2;
+end
 
 if diagJumps == 0
     lambda = 1/h^2;
@@ -39,9 +44,8 @@ else % no diagonal jumps. all jumps along basis vectors
 
 end
 
-if ~strcmpi(specialSetting,'none') && ~isempty(bdyDist)
-    obSlowdownFctr = latticeGeo.obSlowdownFctr;
-    bdyDist = latticeGeo.bdyDist;
+if ~strcmpi(specialSetting,'none') && ~isempty(obSlowdownFctr)
+    
     startNodeRel = startNode - obCtr;
     endNodeRel = endNode - obCtr;
     
@@ -55,12 +59,24 @@ if ~strcmpi(specialSetting,'none') && ~isempty(bdyDist)
         edgeStartInObs = all(abs(startNodeRel) < obRad,2);
         edgeEndInObs = all(abs(endNodeRel) < obRad,2);
         
-        edgeStartInBdy = all(abs(startNodeRel) < (obRad + bdyDist),2);
-        edgeEndInBdy = all(abs(endNodeRel) < (obRad + bdyDist),2);
+        if strcmpi(specialSetting,'bdyAttractRepel')
+            edgeStartInBdy = all(abs(startNodeRel) < (obRad + h),2);
+            edgeEndInBdy = all(abs(endNodeRel) < (obRad + h),2);
+        elseif strcmpi(specialSetting,'bdySlow')
+            edgeStartInBdy = all(abs(startNodeRel) < (obRad + h/2),2);
+            edgeEndInBdy = all(abs(endNodeRel) < (obRad + h/2),2);
+        elseif strcmpi(specialSetting,'bdyBonding')
+            edgeStartInBdy = all(abs(startNodeRel) < (obRad + bdyDist),2);
+            edgeEndInBdy = all(abs(endNodeRel) < (obRad + bdyDist),2);
+        end
+        
 
     end
     
 end
+
+acceleratedEdges = [];
+slowedEdges = [];
 
 if strcmpi(specialSetting,'slowdown')
     % Slows all rates of edges starting or ending in square
@@ -74,26 +90,20 @@ elseif strcmpi(specialSetting,'bdyBonding')
     acceleratedEdges = [];
     slowedEdges = edgeStartInBdy;
     
-elseif strcmpi(specialSetting,'bdyRepel')
+elseif strcmpi(specialSetting,'bdyAttractRepel')
     % Slows all rates from nodes at boundary to nodes not at boundary
-    
-    acceleratedEdges = edgeStartInBdy | ~edgeEndInBdy;
-    slowedEdges = ~edgeStartInBdy | edgeEndInBdy;
-    
-elseif strcmpi(specialSetting,'bdyAttract')
-    % Increase all rates from nodes not at boundary to nodes at boundary
     
     acceleratedEdges = ~edgeStartInBdy | edgeEndInBdy;
     slowedEdges = edgeStartInBdy | ~edgeEndInBdy;
-    
+      
 elseif strcmpi(specialSetting,'bdySlow')
     % Slow all rates from boundary node to boundary node.
     % Meant to simulate nodes sitting on obstruction boundary.
     
     trueObRad = obRad + .25*h;
     
-    edgeStartInBdy = all(abs(startNodeRel) < (trueObRad + bdyDist),2); % old code used obRad, not trueObRad
-    edgeEndInBdy = all(abs(endNodeRel) < (trueObRad + bdyDist),2); % old code used obRad, not trueObRad
+    edgeStartInBdy = all(abs(startNodeRel) < (trueObRad + h/2),2); % old code used obRad, not trueObRad
+    edgeEndInBdy = all(abs(endNodeRel) < (trueObRad + h/2),2); % old code used obRad, not trueObRad
     edgeStartAtCorner = all(abs(abs(startNodeRel) - trueObRad) < 1e-10,2);
     
     acceleratedEdges = [];
@@ -116,8 +126,10 @@ elseif strcmpi(specialSetting,'bdySlow')
     end
 end
 
-if ~strcmpi(specialSetting,'none') && ~isempty(bdyDist)
+if ~isempty(slowedEdges)
     rate(slowedEdges) = rate(slowedEdges)*obSlowdownFctr;
+end
+if ~isempty(acceleratedEdges)
     rate(acceleratedEdges) = rate(acceleratedEdges)/obSlowdownFctr;
 end
 

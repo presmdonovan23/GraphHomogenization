@@ -4,7 +4,7 @@ removeEdges = 1;
 rateReduction = .5;
 
 % misc
-saveOn = 1;
+saveOn = 0;
 plotOn = 1;
 plotLambda = 0;
 plotNodeLabels = 1;

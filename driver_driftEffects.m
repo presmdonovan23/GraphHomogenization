@@ -36,7 +36,7 @@ end
 % boundary bonding
 specialSetting = 'bdyBonding';
 obSlowdownFctr = 1/2;
-bdyDist = .9999*h;
+bdyDist = h;
 
 latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
                 obCtr, diagJumps, specialSetting, ...
@@ -49,9 +49,9 @@ if saveOn
     saveresults(results);
 end
 % boundary attraction
-specialSetting = 'bdyAttract';
+specialSetting = 'bdyAttractRepel';
 obSlowdownFctr = 1/2;
-bdyDist = .9999*h;
+bdyDist = [];
 
 latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
                 obCtr, diagJumps, specialSetting, ...
@@ -63,10 +63,10 @@ results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 if saveOn
     saveresults(results);
 end
-% boundary attraction
-specialSetting = 'bdyRepel';
-obSlowdownFctr = 1/2;
-bdyDist = .9999*h;
+% boundary repulsion
+specialSetting = 'bdyAttractRepel';
+obSlowdownFctr = 2;
+bdyDist = [];
 
 latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
                 obCtr, diagJumps, specialSetting, ...

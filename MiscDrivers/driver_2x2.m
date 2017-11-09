@@ -78,7 +78,7 @@ obSlowdownFctr = .1;
 bdyDist = [];
 
 % Monte Carlo
-numTraj = 10000;
+numTraj = 100;
 startNodeInd = [];
 negateSteps = 1;
 plotOn = 0;

@@ -135,7 +135,7 @@ abs(results.Deff - .743103104943094)
 % bonding
 latticeGeo.specialSetting = 'bdyBonding';
 latticeGeo.obSlowdownFctr = 1/2;
-latticeGeo.bdyDist = .9999*latticeGeo.h;
+latticeGeo.bdyDist = 1/m;
 
 [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
@@ -143,8 +143,9 @@ results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 abs(results.Deff - .524543368195125)
 
 % boundary attraction
-latticeGeo.specialSetting = 'bdyAttract';
+latticeGeo.specialSetting = 'bdyAttractRepel';
 latticeGeo.obSlowdownFctr = 1/2;
+latticeGeo.bdyDist = [];
 
 [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
@@ -152,8 +153,9 @@ results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
 abs(results.Deff - .705490976286049)
 
 % boundary repel
-latticeGeo.specialSetting = 'bdyRepel';
-latticeGeo.obSlowdownFctr = 1/2;
+latticeGeo.specialSetting = 'bdyAttractRepel';
+latticeGeo.obSlowdownFctr = 2;
+latticeGeo.bdyDist = [];
 
 [L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
 results = effDiff(L,nodes,edges,edgeRates,edgeJumps,[],[],latticeGeo);
@@ -273,7 +275,8 @@ diagJumps = 0;
 specialSetting = 'bdySlow';
 driftMult = 0;
 driftDecay = [];
-obSlowdownFctr = 2;
+obSlowdownFctr = [];
+bdyDist = [];
 
 for i = 1:length(mVals)
     m = mVals(i);
@@ -281,7 +284,7 @@ for i = 1:length(mVals)
     
     obCtr = .75 - .5*h;
     obRadCorrected = obRad - .25*h;
-    bdyDist = .9999*h;
+    
     
     latticeGeo = LatticeGeometry(dim, m, name, obRadCorrected, ...
                 obCtr, diagJumps, specialSetting, ...
@@ -308,7 +311,8 @@ diagJumps = 1;
 specialSetting = 'bdySlow';
 driftMult = 0;
 driftDecay = [];
-obSlowdownFctr = 2;
+obSlowdownFctr = [];
+bdyDist = [];
 
 for i = 1:length(mVals)
     m = mVals(i);
@@ -316,7 +320,6 @@ for i = 1:length(mVals)
     
     obCtr = .75 - .5*h;
     obRadCorrected = obRad - .25*h;
-    bdyDist = .9999*h;
     
     latticeGeo = LatticeGeometry(dim, m, name, obRadCorrected, ...
                 obCtr, diagJumps, specialSetting, ...
