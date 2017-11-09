@@ -1,0 +1,283 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+
+\usepackage{geometry}
+\geometry{letterpaper}
+%\geometry{landscape}                		% Activate for for rotated page geometry
+\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+
+\usepackage{amsmath,amsfonts,epsfig,amssymb,graphicx,amsthm,mathtools,subcaption}
+\usepackage{enumerate}
+\usepackage{booktabs}
+\usepackage{tabularx}
+    \newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\usepackage{topcapt}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\real}{{\mathbb R}}
+\newcommand{\borel}{{\mathbb B}}
+\newcommand{\rat}{{\mathbb Q}}
+\newcommand{\nat}{{\mathbb N}}
+\newcommand\sN{\mathcal{N}}
+\newcommand\sS{\mathcal{S}}
+\newcommand\sE{\mathcal{E}}
+\newcommand{\integ}{{\mathbb Z}}
+\newcommand{\posint}{{\mathbb Z}_+}
+\newcommand{\eps}{{\varepsilon}}
+\newcommand{\E}{{\sE}}
+\newcommand{\Exp}{{\mathbb{E}}}
+\newcommand\oS{\bar{\sS}}
+\newcommand\oE{\bar{\sE}}
+
+\title{GraphHomogenization README}
+
+\author{Preston Donovan}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\section{Overview}
+
+This is a README for the GraphHomogenization MATLAB package, a tool that numerically computes the effective diffusivity matrix $D_e$ of a periodic, directed, weighted graph $(\sS,\sE,\lambda)$. These notes assume an understanding of Chapter 4 of my thesis. Functions in \texttt{thisFont} typically refer to MATLAB functions.
+   
+\subsection{Technical Background}
+Under certain assumptions, a periodic, directed, weighted graph $(\sS,\sE,\lambda)$ induces a continuous-time Markov process $Z(t) \in \sS$ with generator
+\begin{equation}
+Lf(x) = \sum_{(x,y) \in \oE} \big(f(y) - f(x)\big) \lambda(x,y),
+\end{equation}
+where $\oE$ is the quotient edge set. The quotient node set is $\oS$. The scaled process $\eps Z(t/\eps^2)$ converges weakly in Skorokhod space to a Brownian motion $B(t)$ where
+\begin{equation}
+\mathbb{E}[B(t) B(t)^T] = 2 D_e t.
+\end{equation}
+The effective diffusivity matrix is given by
+\begin{equation}\label{eqn:Deff}
+D_e = \frac{1}{2} \sum_{y\in\oS} \sum_{e \in \oE_y} \Big(\nu_e \nu_e^T  \lambda_e \pi(y) - \nu_e \omega(y)^T\lambda_e - \omega(y)\nu_e^T\lambda_e\Big).
+\end{equation}
+Here, $\nu_e$ and $\lambda_e$ denote the jump size and jump rate, respectively, of an edge $e$. The stationary distribution $\pi$ satisfies
+\begin{equation}\label{eqn:pi}
+L^T \pi = 0
+\end{equation}
+and $\omega$ is the solution to the unit-cell problem
+\begin{equation}\label{eqn:unit-cell}
+	L^T \omega = \sigma.
+\end{equation}
+
+\subsection{Workflow}
+To numerically computing $D_e$, one must:
+\begin{enumerate}[I]
+	\item Calculate the rate matrix $L$, the quotient node set $\oS$, the quotient edge set $\oE$, the jump rates $\{\lambda_e\}_{e \in \oE}$, and the jump sizes $\{\nu_e\}_{e \in \oE}$.
+	\item Solve $L^T \pi = 0$.
+	\item Solve $L^T \omega = \sigma$.
+\end{enumerate}
+Conceptually, the items in step I are clear and the values of $\pi$ and $\omega$ may be less intuitive. However, computing the former is significantly more involved in terms of lines of code. The linear solves in steps II and III can each be performed in a single line in MATLAB. Thus, much of the code I developed aids in completing step I. The development of this project is motivated by the application of a random walk on a subset of the integer lattice $\integ^d$. Thus, for graphs whose node set is embedded in $h \integ^d$, there are tools in place to aid in completing step I.
+
+Strictly speaking, not all of the items in step I need to be calculated (and some information is technically redundant), but each plays an important role in facilitating the calculation of $D_e$. Certain functions can probably be improved to alleviate this redundancy.
+
+{\bf Remark:} this tool assumes $\oE$ can be identified with $(\Pi \times \Pi)(\sE)$. This assumption is not satisfied for most graphs satisfying $\oS \subset \frac{1}{2} \integ^d$. For this case, we have a special driver with hard-coded fixes.
+
+\section{The \texttt{LatticeGeometry} Class}
+The \texttt{LatticeGeometry} class is a central variable of the tool; it is an object with various fields that characterize a lattice graph. The user must specify a \texttt{LatticeGeometry} object if step I is not complete (i.e., if $L$, $\oS$, $\oE$, $\{\lambda_e\}_{e \in \oE}$, and $\{\nu_e\}_{e \in \oE}$ are not yet defined). Table~\ref{tab:latticegeometry-fields} lists the fields of \texttt{LatticeGeometry}, a brief description, and the possible values. At a minimum, the user must specify \texttt{dim}, \texttt{m}, \texttt{name}, and \texttt{obRad}. Anything else that is not specified will be set to a natural default value.
+% Requires the booktabs if the memoir class is not being used
+\begin{table}
+   \centering
+	%\topcaption{} % requires the topcapt package
+   \begin{tabularx}{\linewidth}{lLL} % Column formatting, @{} suppresses leading/trailing space
+      \toprule
+      Field     & Description & Values \\
+      \midrule
+      \texttt{dim}				& Dimension & 2 or 3 \\
+      \texttt{m}				& Number of possible nodes in period cell along each dimension & Integer $\geq$ 3. May be 2 in some cases.\\
+      \texttt{name} 			& Obstruction geometry & `square' or `circle' \\
+      \texttt{obRad}			& Radius of obstruction (half side length if square) & $[0,1)$ if \texttt{dim} = 2, $[0,\sqrt{2})$ if \texttt{dim} = 3 \\
+      \texttt{obCtr}			& Center of obstruction & $[0,1]^{\texttt{dim}}$\\
+      \texttt{diagJumps}		& 0 if diagonal jumps are not allowed, 1 if diagonal jumps are allowed, and 2 if the diagonal jumps should have ``corrected'' jump rates. & 0, 1, or 2 \\
+      \texttt{specialSetting} 	& Specifies if a special rate function should be used & `none', `slowdown', `bdyBonding', `bdyRepel', `bdyAttract', `bdySlow', `m2\_blockOneSite', `m2\_slowOneSite' \\
+      \texttt{driftMult}		& $K_1$ in~\eqref{eqn:drift} & Real number \\
+      \texttt{driftDecay}		& $K_2$ in~\eqref{eqn:drift} & Positive real number. Only specify if $K_1 > 0$. \\
+      \texttt{obSlowdownFctr}	& $\alpha$ in~\eqref{eqn:rate-slowdown},~\eqref{eqn:rate-bdyBonding},~\eqref{eqn:rate-bdyRepel},~\eqref{eqn:rate-bdyAttract} & Positive real number. Only specify if \texttt{specialSetting} = `slowdown',`bdyBonding', `bdyRepel', `bdyAttract', `bdySlow', or `m2\_slowOneSite' \\
+      \texttt{bdyDist}			& $\delta$ in~\eqref{eqn:bdy-nodes} (distance from obstruction at which the bonding, repulsion, attraction, etc.\ takes place) & $[0,1]$, only specify if \texttt{specialSetting} = `bdy*' \\
+      \texttt{h}				& $1/\texttt{m}$ (the mesh size) & Automatically set \\
+      \texttt{sideLen}			& 2\texttt{obRad} if \texttt{name} = `square' & Automatically set.\\
+      \texttt{isValid}			& Specifies if the \texttt{LatticeGeometry} object is a valid object. & Automatically set when \texttt{validate} is called. 0 or 1.\\
+      \bottomrule
+   \end{tabularx}
+   \caption{Description of fields of \texttt{LatticeGeometry} class. String fields are not case sensitive.}
+   \label{tab:latticegeometry-fields}
+\end{table}
+
+If the jump rate function $\lambda$ is constant, then setting up a \texttt{LatticeGeometry} object is quite simple. The fields \texttt{specialSetting}, \texttt{driftMult}, \texttt{driftDecay}, \texttt{obSlowdownFctr}, and \texttt{bdyDist} are only potentially necessary if the jump rate function is meant to incorporated a drift of model an interaction between the random walk and the obstruction.
+
+{\bf Remark:} It is natural to ask why the \texttt{LatticeGeometry} class does not simply have a field that stores the rate function as a function handle, rather than the numerous fields currently present. This is a reasonable alternative but comes with a downside: if the function handle depends on temporary workspace variables or a .m file that is changing/updated over time, then reproducing old results can be a headache. By characterizing the rate function via a set of fields and a single consistent .m file (\texttt{rate\_lattice.m}), reproducing old results is much more reliable.
+
+The function \texttt{validate} determines whether or not a \texttt{LatticeGeometry} object is valid. For example, this function checks that the dimension is 2 or 3. We now provide in-depth descriptions of the more complicated fields of the \texttt{LatticeGeometry} class.
+
+\subsection{\texttt{diagJumps}}
+A ``diagonal jump'' refers to any edge $e$ where $|\nu_e| = (h,h)$ (in $2D$) or $|\nu_e| = (h,h,h)$ (in $3D$). If only jumps along the standard basis vectors are desired, set \texttt{diagJumps} = 0. Otherwise, set \texttt{diagJumps} = 1 to incorporate diagonal jumps in a naive and straightforward manner.
+
+The downside to this setting is that the diagonal jump rates may not be realistic. For example, if the random walker is near the obstruction boundary (its distance to the obstruction is less than $h$) and it attempts a diagonal jump to a site that is obstructed, the jump would have resulted in a displacement. Setting \texttt{diagJumps} = 2 accounts for this but is only implemented for the case when \texttt{dim} = 2 and \texttt{name} = `square'.
+
+\subsection{\texttt{specialSetting}}
+This field determines the functional form of the rate function $\lambda$.
+
+{\bf Case \texttt{specialSetting} = `none':}
+In this case,
+\begin{equation}\label{eqn:rate-normal}
+	\lambda(x,y) = \frac{D_0}{h^2} + \frac{\mu(x)^T \nu_e}{2h},
+\end{equation}
+where $D_0 = 1$ and $\mu: \oS \rightarrow \real^{\texttt{dim}}$ is the force field,
+\begin{equation}\label{eqn:drift}
+\mu(x) = \frac{K_1}{\exp\big(K_2(||x - \texttt{obCtr}|| - \texttt{obRad})\big)} \cdot \frac{x - \texttt{obCtr}}{||x - \texttt{obCtr}||}.
+\end{equation}
+If $K_1 > 0$ (i.e., a drift is present), then one must set \texttt{name} = `circle' and \texttt{diagJumps} = 0. The code can easily be extended to accommodate the case when \texttt{name} = `square'.
+
+{\bf Case \texttt{specialSetting} = `slowdown':}
+This setting allows modeling a permeable obstruction $\mathcal{O}$, in which the random walker has a different jump rate. This is the only setting wherein the node set is $\sS = h \integ^{\texttt{dim}}$ (i.e., nodes in $\mathcal{O}$ are not removed). The jump rate is given by
+\begin{equation}\label{eqn:rate-slowdown}
+\lambda(x,y) = 
+	\begin{cases}
+		1/h^2 & x \notin \mathcal{O} \\
+		\alpha/h^2 & x \in \mathcal{O},
+	\end{cases}
+\end{equation}
+where $\alpha = \texttt{obSlowdownFctr}$.
+
+{\bf Case \texttt{specialSetting} = `bdyBonding', `bdyRepel', or `bdyAttract':} In each of these settings, all jump rates along edges that originate near the obstruction boundary are modified in some way. Intuitively, `bdyBonding', `bdyRepel', and `bdyAttract' model a bonding, repulsion, and attraction effect between the obstruction and random walker.
+
+Define the set of nodes within a distance $\delta$ of the obstruction by
+\begin{equation}\label{eqn:bdy-nodes}
+\mathcal{B}_{\delta} = \{x \in \oS \;|\; d(x,\mathcal{O}) < \delta\}
+\end{equation}
+where $\delta \coloneqq \texttt{bdyDist}$ and the distance between a node and the obstruction, $d(x,\mathcal{O})$, is defined in the obvious way.
+
+In the `bdyBonding' case, the user specifies \texttt{bdyDist} $\in [0,1]$ and the jump rate function is given by
+\begin{equation}\label{eqn:rate-bdyBonding}
+	\lambda(x,y) =
+	\begin{cases}
+		 \alpha/h^2 & x \in \mathcal{B}_{\delta} \\
+		 1/h^2 & x \notin \mathcal{B}_{\delta}.
+	\end{cases}
+\end{equation}
+This rate function slows the random walker whenever it is near the boundary of an obstruction.
+
+In the `bdyRepel' case, we impose \texttt{bdyDist} $= h$ and define
+\begin{equation}\label{eqn:rate-bdyRepel}
+	\lambda(x,y) =
+	\begin{cases}
+		 1 / (\alpha h^2) & x \in \mathcal{B}_{\delta}, y \notin \mathcal{B}_{\delta}\\
+		 \alpha / h^2 & x \notin \mathcal{B}_{\delta}, y \in \mathcal{B}_{\delta} \\
+		 1/h^2 & \text{ otherwise,}
+	\end{cases}
+\end{equation}
+which causes the random walker to be pushed away from the obstructions.
+
+In the `bdyAttract' case, we impose \texttt{bdyDist} $= h$ and define
+\begin{equation}\label{eqn:rate-bdyAttract}
+	\lambda(x,y) =
+	\begin{cases}
+		 \alpha / h^2 & x \in \mathcal{B}_{\delta}, y \notin \mathcal{B}_{\delta}\\
+		 1 / (\alpha h^2) & x \notin \mathcal{B}_{\delta}, y \in \mathcal{B}_{\delta} \\
+		 1/h^2 & \text{ otherwise.}
+	\end{cases}
+\end{equation}
+This rate function pulls the random walker towards the obstructions.
+
+{\bf Case \texttt{specialSetting} = `m2\_blockOneSite' or `m2\_slowOneSite':}
+{\bf Must use the driver \texttt{driver\_2x2} in these cases.} Internally, most of the code assumes that $\oE$ can be identified with $(\Pi \times \Pi)(\sE)$. When \texttt{m} = 2, this is not the case and thus should be avoided if possible. Currently, there is a hotfix in place when \texttt{m} = 2 and \texttt{dim} = 2. In this case, the user \emph{must} set \texttt{specialSetting} = `m2\_blockOneSite' or `m2\_slowOneSite'.
+
+When \texttt{specialSetting} = `m2\_blockOneSite', all edges originating or ending in the node $(2/3,2/3)$ are removed. When \texttt{specialSetting} = `m2\_slowOneSite', all edges originating or ending in the node $(2/3,2/3)$ have their rates scaled by \texttt{obSlowdownFctr}.
+
+{\bf Case \texttt{specialSetting} = `bdySlow':} {\bf Must use the driver \texttt{driver\_nodesAtBdy} in this case.} This is an experimental setting wherein nodes are placed at the boundary of an obstruction. Rates are doubled along edges that start at the boundary, do not start at a corner, and do not end at the boundary.
+ 
+\subsection{\texttt{driftMult} and \texttt{driftDecay}}
+These two fields are only relevant when \texttt{specialSetting} = `none'. \texttt{driftMult} and \texttt{driftDecay} are equal to $K_1$ and $K_2$ in~\eqref{eqn:drift}, respectively. Conceptually, \texttt{driftMult} controls the strength of the drift field and whether it points towards or away from the obstruction center. If \texttt{driftMult} $> 0$, then the drift field will point away from the obstruction. Clearly, the magnitude of the drift decreases as one moves away from the obstruction. As \texttt{driftDecay} increases, this rate of decay increases.
+
+\subsection{\texttt{obSlowdownFctr}}
+A parameter related to the rate function $\lambda$ when \texttt{specialSetting} = `slowdown', `bdyBonding', `bdyRepel', `bdyAttract', or `m2\_slowOneSite'. Specifically, $\alpha = $ \texttt{obSlowdownFctr} in~\eqref{eqn:rate-slowdown},~\eqref{eqn:rate-bdyBonding},~\eqref{eqn:rate-bdyRepel},~\eqref{eqn:rate-bdyAttract}.
+
+\subsection{\texttt{bdyDist}}
+A parameter that determines which jump rates are modified when \texttt{specialSetting} = `bdyBonding'. Specifically, $\delta = $ \texttt{bdyDist} in~\eqref{eqn:rate-bdyBonding}.
+
+\section{Function Descriptions}
+\subsection{Root}
+A set of drivers that the user can modify and run. Ideally, the user only creates and modifies files in this directory, which should solely consist of drivers that call functions in the subdirectories. A driver should typically do the following (assuming the graph is a lattice graph):
+\begin{enumerate}
+	\item Pass the properties of the graph (e.g., $d$, $m$, obstruction radius, etc.) to \texttt{LatticeGeometry} to create a \texttt{LatticeGeometry} object.
+	\item Pass the \texttt{LatticeGeometry} object to \texttt{homogInputs\_lattice} to create the rate matrix $L$, the quotient node set $\oS$, the quotient edge set $\oE$, the jump rates $\{\lambda_e\}_{e \in \oE}$, and the jump sizes $\{\nu_e\}_{e \in \oE}$.
+	\item Pass $L$, $\oS$, $\oE$, $\{\lambda_e\}_{e \in \oE}$, $\{\nu_e\}_{e \in \oE}$, and the \texttt{LatticeGeometry} object to \texttt{effDiff} to compute the effective diffusivity $D_e$.
+	\begin{enumerate}
+		\item To estimate $D_e$ via Monte Carlo simulation, also pass the number of trajectories and trajectory starting locations to \texttt{effDiff}.
+	\end{enumerate}
+	\item (Optional) Plot the results.
+	\item (Optional) Save the results.
+\end{enumerate}
+
+\subsection{HomogTools/}
+{\bf Modifying code in this directory may result in changes to the calculation of $D_e$.} The functions in HomogTools/ essentially perform steps II and III. That is, $L$, $\oS$, $\oE$, $\lambda_e$, and $\nu_e$ must already be computed to use any of these functions. These five items from this step are passed to \texttt{effDiff\_homog}, which proceeds as follows:
+\begin{enumerate}
+	\item Call \texttt{LUFull} to compute the LU factorization.
+	\item Call \texttt{statDist} to compute $\pi$ \eqref{eqn:pi}.
+	\item Call \texttt{unitCell} to compute $\omega$ \eqref{eqn:unit-cell}.
+	\item Call \texttt{buildEffDiff} to compute $D_e$ \eqref{eqn:Deff}.
+\end{enumerate}
+There are two other functions in HomogTools/. The function \texttt{effDiff\_mc} approximates $D_e$ via Monte Carlo simulation and \texttt{effDiff} is a simple wrapper for calling \texttt{effDiff\_homog} and \texttt{effDiff\_mc}.
+
+\begin{itemize}
+\item \texttt{buildEffDiff.m} Performs that actual computation of the effective diffusivity matrix as in~\eqref{eqn:Deff} once the stationary distribution and unit-cell solute have been computed.
+\item \texttt{effDiff.m} Wrapper function that calls \texttt{effDiff\_homog} and \texttt{effDiff\_mc}.
+\item \texttt{effDiff\_homog.m} Computes the effective diffusivity from the rate matrix, graph's nodes, graph's edges, edge weights, and edge jumps. Calls \texttt{LUFull}, \texttt{statDist}, \texttt{unitCell}, and \texttt{buildDeff}.
+\item \texttt{effDiff\_mc.m} Approximates the effective diffusivity via Monte Carlo simulation.
+\item \texttt{LUFull.m} Computes the full LU factorization (includes permutation matrices and diagonal scaling matrix).
+\item \texttt{statDist.m} Computes the stationary distribution.
+\item \texttt{unitCell.m} Solves the unit-cell problem.
+\end{itemize}
+
+\subsection{LatticeTools/}
+{\bf Modifying code in this directory may result in changes to the calculation of $D_e$.} A set of functions for setting up the graph's node set, edge set, and edge weights assuming the graph satisfies certain geometric conditions.
+
+LatticeTools/ contains four functions that aid in setting up the necessary inputs of \texttt{effDiff\_homog}, \texttt{effDiff\_mc}, and \texttt{effDiff}: $L$, $\oS$, $\oE$, $\lambda_e$, and $\nu_e$. However, these functions only apply to a specific graph setting, which we call a \emph{lattice graph}.
+
+For any fixed $h > 0$, a lattice graph is any graph $(\sS,\sE,\lambda)$ satisfying our standard assumptions in addition to the following:
+\begin{enumerate}
+	\item $\sS = h\mathbb{Z}^d \backslash \mathcal{O}$ where $d = 2$ or $3$ and $\mathcal{O}$ (the "obstructed region") consists of a periodically repeated square or circle (when $d = 2$) or cube or sphere (when $d = 3$),
+	\item $\sE$ consists of all pairs of nodes and their nearest $2d$ neighbors or their nearest $3d$ neighbors (i.e., diagonal jumps are included).
+\end{enumerate}
+
+The function \texttt{homogInputs\_lattice} works in conjunction with \texttt{rate\_lattice} to generate the five inputs. Various rate functions are allowed.
+
+\begin{itemize}
+\item \texttt{getNodes\_lattice.m} Calculates the set of free nodes from a LatticeGeometry object.
+\item \texttt{homogInputs\_lattice.m} Sets up the rate matrix, node set, edge set, edge weights, and edge jumps of a \texttt{LatticeGeometry} object. Calls \texttt{getNodes\_lattice}.
+\item \texttt{LatticeGeometry.m} A class that holds the defining features of a lattice geometry. Can also be used to check that a lattice geometry is valid.
+\item \texttt{rate\_lattice.m} Computes the rate of an edge given a \texttt{LatticeGeometry} object.
+\end{itemize}
+
+\subsection{PlottingTools/}
+This directory contains a set of functions for drawing a periodic cell of a graph, plotting the effective diffusivity coefficients, and drawing the drift field of a rate function (if present).
+\begin{itemize}
+\item \texttt{drawCell.m} Draws a periodic cell of the graph.
+\item \texttt{drawCell\_lattice.m} Draws a periodic cell of the graph assuming the graph satisfies certain geometric conditions.
+\item \texttt{drawDriftField.m} Draws a vector field based on the drift function.
+\item \texttt{plotObRadVsEffDiff.m} Plots the effective diffusivities computed by homogenization theory and Monte Carlo simulation against obstruction radius.
+\end{itemize}
+
+\subsection{MiscTools/}
+Functions that don't fit elsewhere are stored here. The function \texttt{saveResults} generates an appropriate file name and saves the homogenization theory and Monte Carlo calculations. The function \texttt{checkDetailedBalance} determines whether a graph satisfies the detailed balance condition.
+
+\begin{itemize}
+\item \texttt{checkDetailedBalance.m} Determines whether a graph satisfies the detailed balance condition.
+\item \texttt{diagnostics.m} A script for ensuring that code changes do not lead to different/inaccurate results.
+\item \texttt{saveResults.m} Saves a results object.
+\end{itemize}
+
+\subsection{MiscDrivers/}
+Some drivers specific to my research.
+
+\end{document}
