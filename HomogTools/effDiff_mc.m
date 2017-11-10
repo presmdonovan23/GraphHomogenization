@@ -1,4 +1,4 @@
-function mc = effDiff_mc(L, nodes, edges, edgeJumps, numTraj, startNodeInd, plotOn, negateSteps )
+function mc = effDiff_mc(L, nodes, edges, edgeJumps, numTraj, startNodeInd, plotOn, negateSteps, verbose )
 
 if nargin < 5 || isempty(numTraj)
     numTraj = 1000;
@@ -11,6 +11,9 @@ if nargin < 7 || isempty(plotOn)
 end
 if nargin < 8 || isempty(negateSteps)
     negateSteps = 0;
+end
+if nargin < 9 || isempty(verbose)
+    verbose = 1;
 end
 
 if size(nodes,1) > 4 && negateSteps
@@ -37,7 +40,7 @@ tic
 
 if mod(numTraj,100) ~= 0 && numTraj > 0    
     numTraj = 100*ceil(numTraj/100);
-    fprintf('Rounding numTraj to %d.\n',numTraj);
+    warning('numTraj must be a multiple of 100. Setting numTraj to %d.\n',numTraj);
 end
 
 if length(startNodeInd) == 1
@@ -51,25 +54,31 @@ tmax = 25;
 timeRec = linspace(0,tmax,numTimeRec);
 locInterp = zeros(numTraj,dim,numTimeRec);
 
-fprintf('Monte Carlo (%d simulations):\n',numTraj);
+if verbose
+    fprintf('Monte Carlo (%d simulations):\n',numTraj);
+end
+% break down into percentage of trajectories completed
 for p = 1:100
     for i = (1+(p-1)*numTraj/100):(p*numTraj/100)
         
         curStartNodeInd = startNodeInd(i);
         curStartNode = nodes(curStartNodeInd,:);
         
+        % run a single trajectory
         [ timeCur, locCur ] = ...
             trajectory( L, edges, edgeJumps, curStartNode, curStartNodeInd, tmax, negateSteps );
         locInterp(i,:,:) = interp1(timeCur',locCur',timeRec')';
         
     end
     
-    if mod(p,10) == 1
-        fprintf('\t');
-    end
-    fprintf('%d%%,',p)
-    if mod(p,10) == 0
-        fprintf('\n');
+    if verbose
+        if mod(p,10) == 1
+            fprintf('\t');
+        end
+        fprintf('%d%%,',p)
+        if mod(p,10) == 0
+            fprintf('\n');
+        end
     end
     
 end
@@ -109,7 +118,9 @@ if plotOn
     ylabel('SD')
 end
 
-fprintf('\tFinished %d Monte Carlo simulations in %.2f seconds.\n',numTraj, time);
+if verbose
+    fprintf('\tFinished %d Monte Carlo simulations in %.2f seconds.\n',numTraj, time);
+end
 
 end
 
@@ -172,7 +183,7 @@ time = time(1:stepNum);
 
 edgeJumps_traj = edgeJumps(edgeInds_traj,:);
 
-% Only use if m = 2
+% Only needed if m = 2
 if negateSteps
     stepsToNegate = rand(stepNum-1,1) < .5;
     edgeJumps_traj(stepsToNegate,:) = -edgeJumps_traj(stepsToNegate,:);
@@ -212,6 +223,7 @@ Deff = slope/(2*d*t(end));
 DeffVar = alpha*covYbar*alpha'/((2*d*t(end))^2);
 CI_low = Deff - 1.96*sqrt(DeffVar);
 CI_high = Deff + 1.96*sqrt(DeffVar);
+
 end
 
 %{

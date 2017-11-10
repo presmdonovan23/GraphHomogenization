@@ -1,6 +1,11 @@
-function [nodes, isFree] = getNodes_lattice( latticeGeo )
+function [nodes, isFree] = getNodes_lattice( latticeGeo, verbose )
 % assumes nodes live on lattice
 % assumes cell has length 1
+
+if nargin < 2 || isempty(verbose)
+    verbose = 1;
+end
+
 tic
 
 dim = latticeGeo.dim;
@@ -58,6 +63,8 @@ nodes = reshape(nodes,m^dim,dim);
 nodes = nodes(isFree(:) > 0,:);
 
 time = toc;
-fprintf('\tCalculated available sites in %.1f seconds.\n',time);
+if verbose
+    fprintf('\tCalculated available sites in %.1f seconds.\n',time);
+end
 
 end

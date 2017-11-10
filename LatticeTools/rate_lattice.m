@@ -40,7 +40,7 @@ else % no diagonal jumps. all jumps along basis vectors
     d = sum(jump.*mu,2);  % contains the x,y, or z component of drift
     
     rate = lambda + d/(2*h);
-    %rate = lambda*exp(driftMult*2*h*d);
+    %rate = lambda*exp(driftMult*2*h*d); % an approximation. only necessary for small m.
 
 end
 
@@ -78,6 +78,8 @@ end
 acceleratedEdges = [];
 slowedEdges = [];
 
+% in some special settings, there is a set of jump rates that are increased
+% or decreased. we find those edges now.
 if strcmpi(specialSetting,'slowdown')
     % Slows all rates of edges starting or ending in square
     
@@ -136,6 +138,8 @@ end
 end
 
 function val = drift(x,obCtr,obRad,driftMult,driftDecay)
+% drift function \mu
+
 % only makes sense for circular obstuctions
 
 relX = x - obCtr;
@@ -150,6 +154,7 @@ val(~isfinite(val)) = 0;
 end
 
 function val = correctDiag(val,lambda,x,y,h,sideLen)
+    % this function corrects the jump rates when diagJumps = 2
     
     TOL = 1e-10;
     nu = (1/h)*(y-x);

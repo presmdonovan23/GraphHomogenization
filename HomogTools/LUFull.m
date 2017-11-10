@@ -1,8 +1,15 @@
-function [factors, LUtime] = LUFull(L)
+function [factors, LUtime] = LUFull(L, verbose)
+
+if nargin < 2 || isempty(verbose)
+    verbose = 1;
+end
 tic;
 [LL,U,P,Q,R] = lu(L);
 LUtime = toc;
-fprintf('\tCalculated LU decomposition in %.1f seconds.\n',LUtime);
+
+if verbose
+    fprintf('\tCalculated LU decomposition in %.1f seconds.\n',LUtime);
+end
 
 factors.L = LL; % extra memory wont be allocated here
 factors.U = U;

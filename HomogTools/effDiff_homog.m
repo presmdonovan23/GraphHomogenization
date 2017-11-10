@@ -1,16 +1,22 @@
-function results = effDiff_homog(L,nodes,edges,edgeRates,edgeJumps)
+function results = effDiff_homog(L,nodes,edges,edgeRates,edgeJumps,verbose)
 
-fprintf('Homogenization theory:\n');
+if nargin < 6 || isempty(verbose)
+    verbose = 1;
+end
+if verbose
+    fprintf('Homogenization theory:\n');
+end
+TOL = [];
 
 % get LU factors
-[LTFactors, LUtime] = LUFull(L');
+[LTFactors, LUtime] = LUFull(L',verbose);
 % solve for stationary distribution
-[pi0, pi0_relRes, pi0_flag, pi0_time] = statDist(L,LTFactors);
+[pi0, pi0_relRes, pi0_flag, pi0_time] = statDist(L,LTFactors,TOL,verbose);
 % solve unit-cell problem
 [unitCell_soln, unitCell_RHS, unitCell_relRes, unitCell_solvability, unitCell_flag, unitCell_time] = ...
-    unitCell(L,LTFactors,pi0,nodes,edges,edgeRates,edgeJumps);
-% calculate effective diffusivity
-[Deff,DeffTerm1,DeffTerm2] = buildEffDiff( edges, edgeRates, edgeJumps, pi0, unitCell_soln );
+    unitCell(L,LTFactors,pi0,nodes,edges,edgeRates,edgeJumps,TOL,verbose);
+% calculate effective diffusivity (homog + monte carlo)
+[Deff,DeffTerm1,DeffTerm2] = buildEffDiff( edges, edgeRates, edgeJumps, pi0, unitCell_soln, verbose );
 
 % store everything
 results.L =                     L;

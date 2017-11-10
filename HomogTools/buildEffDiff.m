@@ -1,4 +1,4 @@
-function [Deff, term1, term2] = buildEffDiff( edges, edgeRates, edgeJumps, pi0, unitCell_soln )
+function [Deff, term1, term2] = buildEffDiff( edges, edgeRates, edgeJumps, pi0, unitCell_soln, verbose )
 % Computes effective diffusivity matrix given necessary ingredients
 % Inputs:
 %   1) edges = an e x 2 array where e = number of edges in the quotient
@@ -13,6 +13,13 @@ function [Deff, term1, term2] = buildEffDiff( edges, edgeRates, edgeJumps, pi0, 
 %   ith node
 %   5) unitCell_soln = s x 1 array where unitCell_soln(i) = unit-cell
 %   solution at ith node
+%   6) verbose = optional parameter controlling amount of output
+% Outputs:
+%   1) Deff = effective diffusivity matrix. Deff = term1 + term2.
+
+if nargin < 6 || isempty(verbose)
+    verbose = 1;
+end
 
 tic
 dim = size(edgeJumps,2);
@@ -36,6 +43,9 @@ term2 = -.5*(term2 + term2');
 Deff = term1 + term2;
 
 time = toc;
-fprintf('\tSet up effective diffusivity matrix in %.1f seconds.\n',time);
+
+if verbose
+    fprintf('\tSet up effective diffusivity matrix in %.1f seconds.\n',time);
+end
 
 end
