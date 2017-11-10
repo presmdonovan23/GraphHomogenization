@@ -144,3 +144,44 @@ axis off
 
 
 end
+
+function fh = myDrawCube( center, sideLength, fh )
+% code modified from a post on mathworks forums
+if nargin < 3 || isempty(fh)
+    fh = figure;
+else
+    figure(fh);
+end
+
+x=([0 1 1 0 0 0;1 1 0 0 1 1;1 1 0 0 1 1;0 1 1 0 0 0]-0.5)*sideLength+center(1);
+y=([0 0 1 1 0 0;0 1 1 0 0 0;0 1 1 0 1 1;0 0 1 1 1 1]-0.5)*sideLength+center(2);
+z=([0 0 0 0 0 1;0 0 0 0 0 1;1 1 1 1 0 1;1 1 1 1 0 1]-0.5)*sideLength+center(3);
+
+for i=1:6
+    h=patch(x(:,i),y(:,i),z(:,i),'r','FaceAlpha',0.5,'FaceLighting','gouraud','EdgeColor','none');
+    set(h,'edgecolor','k')
+end
+
+end
+
+function fh = myDrawLine( start,finish,width,color,fh )
+%DRAWLINE Summary of this function goes here
+%   Detailed explanation goes here
+if nargin < 5 || isempty(fh)
+    fh = figure;
+else
+    figure(fh);
+end
+
+if nargin < 3 || isempty(width)
+    width = 1;
+end
+
+if nargin < 4 || isempty(color)
+    color = 'black';
+end
+
+line([start(1) finish(1)],[start(2) finish(2)],...
+            'linewidth',width,'color',color);
+
+end
