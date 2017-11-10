@@ -84,16 +84,22 @@ for p = 1:100
 end
 
 sdInterp = squeeze(sum((locInterp - nodes(startNodeInd,:)).^2,2));
+
 MSD = mean(sdInterp,1);
 
 Deff_all = MSD(2:end)./(2*dim*timeRec(2:end)); % for all Deff estimates
+
+%{
 Deff = Deff_all(end);
 
 DeffVar_all = var(sdInterp./(2*dim*timeRec),[],1);
 DeffVar = DeffVar_all(end);%var(sdInterp(:,end)/(2*dim*tmax));
 
-Deff_CI_low = Deff - 1.96*sqrt(DeffVar)/sqrt(numTraj);
-Deff_CI_high = Deff + 1.96*sqrt(DeffVar)/sqrt(numTraj);
+Deff_CI_low = Deff - 1.96*sqrt(DeffVar)/sqrt(numTraj)
+Deff_CI_high = Deff + 1.96*sqrt(DeffVar)/sqrt(numTraj)
+%}
+
+[Deff, DeffVar, Deff_CI_high, Deff_CI_low] = getDeff(timeRec,sdInterp,dim);
 
 time = toc;
 
@@ -104,7 +110,6 @@ mc.startNodeInd = startNodeInd;
 mc.Deff = Deff;
 mc.Deff_all = Deff_all;
 mc.Deff_var = DeffVar;
-mc.Deff_var_all = DeffVar_all;
 mc.Deff_95CI = [Deff_CI_low,Deff_CI_high];
 
 if plotOn
@@ -195,14 +200,13 @@ loc(:,2:end) = cumsum(edgeJumps_traj,1)' + startNode';
 
 end
 
-
-function [Deff, DeffVar, CI_high, CI_low] = getDeff(t,sd)
+function [Deff, DeffVar, CI_high, CI_low] = getDeff(t,sd,dim)
 
 [N, T] = size(sd);
 
-Ybar = mean(sd,2);
+Ybar = mean(sd,1);
 alpha = t./sum(t.^2);
-slope = alpha*Ybar;
+slope = alpha*Ybar';
 
 covYbar = zeros(T,T);
 
@@ -217,38 +221,9 @@ for i = 1:T
     end
 end
 
-%varslope = alpha*covYbar*alpha';
-
-Deff = slope/(2*d*t(end));
-DeffVar = alpha*covYbar*alpha'/((2*d*t(end))^2);
+Deff = slope/(2*dim);
+DeffVar = alpha*covYbar*alpha'/((2*dim)^2);
 CI_low = Deff - 1.96*sqrt(DeffVar);
 CI_high = Deff + 1.96*sqrt(DeffVar);
 
 end
-
-%{
-function [Deff, CI_high CI_low] = getDeff(t,sd)
-
-[N, T] = size(sd);
-
-Ybar = mean(sd,2);
-alpha = t./sum(t.^2);
-slope = alpha*Ybar;
-
-for i = 1:T
-    for j = 1:T
-        Yi = sd(:,i);
-        Yj = sd(:,j);
-        Yibar = mean(Yi);
-        Yjbar = mean(Yj);
-        
-        covYbar(i,j) = (1/N)*(1/N*sum(Yi.*Yj)-Yibar*Yjbar);
-    end
-end
-
-varslope = alpha*covYbar*alpha';
-
-Deff = slope/(2*d*t(end));
-CI_high = Deff+1.96*sqrt(varslope)/(2*d*t(end))
-end
-%}
