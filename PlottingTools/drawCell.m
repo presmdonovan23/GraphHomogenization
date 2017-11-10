@@ -67,15 +67,6 @@ end
 
 if drawEdges
     
-    if m == 2
-        warning('reminder: hard-coded modification for m = 2.');
-        nEdgeJumps = size(edgeJumps,1);
-        [~,inds] = unique([nodes(edges(:,1),:),edgeJumps],'rows');
-        negInds = setdiff((1:nEdgeJumps),inds);
-        edgeJumps(negInds,:) = -edgeJumps(negInds,:);
-        
-    end
-    
     if drawEdges == 1 % draw edges w/o arrows
         for i = 1:size(edgeJumps)
             edgeStart = nodes(edges(i,1),:);

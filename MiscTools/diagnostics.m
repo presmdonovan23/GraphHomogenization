@@ -404,3 +404,63 @@ results_orig = [results_orig.results.Deffres];
 Deff_orig = [results_orig.Deff_homog];
 Deff_orig = Deff_orig(1,1:2:end);
 norm([results.Deff] - Deff_orig)
+
+%% blockOneSite
+% geometry
+dim = 2;
+m = 2;
+name = 'square';
+obRad = .25;
+obCtr = [.75 .75];
+diagJumps = 0;
+specialSetting = [];
+driftMult = 0;
+driftDecay = [];
+obSlowdownFctr = [];
+bdyDist = [];
+
+% Monte Carlo
+numTraj = 10000;
+startNodeInd = [];
+
+% get Deff
+latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+            obCtr, diagJumps, specialSetting, ...
+            driftMult, driftDecay, obSlowdownFctr, bdyDist);
+
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,numTraj,startNodeInd,latticeGeo);
+
+norm(results.Deff - 2/3)
+norm(results.mc.Deff - 2/3)
+%% slowOneSite
+% geometry
+dim = 2;
+m = 2;
+name = 'square';
+obRad = .25;
+obCtr = [.75 .75];
+diagJumps = 0;
+specialSetting = 'm2_slowOneSite'; %slowOneSite
+driftMult = 0;
+driftDecay = [];
+obSlowdownFctr = .35;
+bdyDist = [];
+
+% Monte Carlo
+numTraj = 10000;
+startNodeInd = [];
+
+% get Deff
+latticeGeo = LatticeGeometry(dim, m, name, obRad, ...
+            obCtr, diagJumps, specialSetting, ...
+            driftMult, driftDecay, obSlowdownFctr, bdyDist);
+
+[L,nodes,edges,edgeRates,edgeJumps] = homogInputs_lattice(latticeGeo);
+
+results = effDiff(L,nodes,edges,edgeRates,edgeJumps,numTraj,startNodeInd,latticeGeo);
+
+correctDeff = (.5 + .5*obSlowdownFctr)
+norm(results.Deff - correctDeff)
+norm(results.mc.Deff - correctDeff)

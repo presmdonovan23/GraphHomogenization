@@ -15,7 +15,7 @@ end
 
 if size(nodes,1) > 4 && negateSteps
     warning('negateSteps should only be 1 if m = 2.');
-elseif size(nodes,1) <= 4 && ~negateSteps
+elseif size(nodes,1) <= 4 && ~negateSteps && numTraj > 0
     warning('It appears that m = 2 and negateSteps = 0. Results may be inaccurate if m = 2.')
 end
     

@@ -36,7 +36,7 @@ end
 % shift/scale sites to live on [0,1]^d
 nodes = (nodes - .5)*h;
 
-if obRad == 0
+if obRad == 0 || strcmpi(specialSetting,'m2_slowOneSite')
     mDim = m*ones(1,dim);
     isFree = true(mDim);
 else
@@ -44,13 +44,9 @@ else
         dist2ctr2 = sum((nodes - obCtr3).^2,dim+1);
         dist2ctr2 = round(dist2ctr2,m); % eliminate numerical error that could make obstructed sites non-symmetrical
         isFree = dist2ctr2 > obRad^2;
-    elseif strcmpi(name,'square') && ~strcmpi(specialSetting,'slowdown')
+    elseif strcmpi(name,'square')
         % ** could be some numerical error for small m where sites are on boundary of obstructed region
         isFree = ~all(abs(nodes - obCtr3) <= obRad,dim+1);
-        
-    elseif strcmpi(name,'square') && ~strcmpi(specialSetting,'slowdown')
-        mDim = m*ones(1,dim);
-        isFree = true(mDim);
     end
 end
 

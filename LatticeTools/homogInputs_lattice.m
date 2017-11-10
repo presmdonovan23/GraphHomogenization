@@ -104,23 +104,23 @@ edgeJumps(inds) = edgeJumps(inds) - sign(edgeJumps(inds));
 
 %%
 specialSetting = latticeGeo.specialSetting;
-if m == 2 && ~strcmpi(specialSetting,'none')
+if m == 2
     
-    edgeJumps(5:8,:) = -edgeJumps(5:8,:);
-    edgeJumps(13:16,:) = -edgeJumps(13:16,:);
-
-    if strcmpi(specialSetting,'m2_blockOneSite')
-        edgesToRemove = or(edges(:,1) == 4, edges(:,2) == 4);
-
-        edges(edgesToRemove,:) = [];
-        edgeJumps(edgesToRemove,:) = [];
-        edgeRates(edgesToRemove) = [];
-        nodes(4,:) = [];
-        
-    elseif strcmpi(specialSetting,'m2_slowOneSite')
+    if size(edges,1) == 8
+        edgesToNegate = [3,4,7,8];
+    elseif size(edges,1) == 16
+        edgesToNegate = [5:8 13:16];
+    else
+        error('Something went wrong. There should be 12 or 16 edges when m = 2.');
+    end
+    
+    edgeJumps(edgesToNegate,:) = -edgeJumps(edgesToNegate,:);
+    
+    if strcmpi(specialSetting,'m2_slowOneSite')
         edgesToSlow = or(edges(:,1) == 4, edges(:,2) == 4);
         edgeRates(edgesToSlow) = latticeGeo.obSlowdownFctr*edgeRates(edgesToSlow);
     end
+    
     L = sparse(edges(:,1),edges(:,2),edgeRates);
     L = L - diag(sum(L,2));
 end

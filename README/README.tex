@@ -94,12 +94,12 @@ The \texttt{LatticeGeometry} class is a central variable of the tool; it is an o
       Field     & Description & Values \\
       \midrule
       \texttt{dim}				& Dimension & 2 or 3 \\ \hline
-      \texttt{m}				& Number of possible nodes in period cell along each dimension & Integer $\geq$ 3. May be 2 in some cases.\\ \hline
+      \texttt{m}				& Number of possible nodes in period cell along each dimension & Integer $\geq$ 2 if \texttt{dim} = 2. Integer $\geq$ 3 if \texttt{dim} = 3.\\ \hline
       \texttt{name} 			& Obstruction geometry & `square' or `circle' \\ \hline
       \texttt{obRad}			& Radius of obstruction (half side length if square) & $[0,1)$ if \texttt{dim} = 2, $[0,\sqrt{2})$ if \texttt{dim} = 3 \\ \hline
       \texttt{obCtr}			& Center of obstruction & $[0,1]^{\texttt{dim}}$\\ \hline
       \texttt{diagJumps}		& 0 if diagonal jumps are not allowed, 1 if diagonal jumps are allowed, and 2 if the diagonal jumps should have ``corrected'' jump rates. & 0, 1, or 2 \\ \hline
-      \texttt{specialSetting} 	& Specifies if a special rate function should be used & `none', `slowdown', `bdyBonding'', `bdyAttractRepel', `bdySlow', `m2\_blockOneSite', `m2\_slowOneSite' \\ \hline
+      \texttt{specialSetting} 	& Specifies if a special rate function should be used & `none', `slowdown', `bdyBonding'', `bdyAttractRepel', `bdySlow', `m2\_slowOneSite' \\ \hline
       \texttt{driftMult}		& $K_1$ in~\eqref{eqn:drift} & Real number \\ \hline
       \texttt{driftDecay}		& $K_2$ in~\eqref{eqn:drift} & Positive real number. Only specify if $K_1 > 0$. \\ \hline
       \texttt{obSlowdownFctr}	& $\alpha$ in~\eqref{eqn:rate-slowdown},~\eqref{eqn:rate-bdyBonding},~\eqref{eqn:rate-bdyAttractRepel} & Positive real number. Only specify if \texttt{specialSetting} = `slowdown',`bdyBonding', `bdyAttractRepel', or `m2\_slowOneSite' \\ \hline
@@ -132,6 +132,8 @@ If \texttt{name} = `square', then
 \begin{equation*}
 \mathcal{O} = \{x \in [0,1]^{\texttt{dim}} \;|\; ||x - \texttt{obCtr}||_{\infty} \leq \texttt{obRad}\}.
 \end{equation*}
+
+If \texttt{m} = 2, we force the obstruction (if one exists) to have \texttt{obCtr} = (3/4,3/4) and \texttt{obRad} $\in [0,1/2)$.
 
 \subsection{\texttt{diagJumps}}
 This field determines the edge set $\oE$. A ``diagonal jump'' refers to any edge $e$ where $|\nu_e| = (h,h)$ (in $2D$) or $|\nu_e| = (h,h,h)$ (in $3D$). If only jumps along the standard basis vectors are desired, set \texttt{diagJumps} = 0. Otherwise, set \texttt{diagJumps} = 1 to incorporate diagonal jumps in a naive and straightforward manner.
@@ -192,10 +194,8 @@ In the `bdyAttractRepel' case, we impose $\delta = h$ and define
 \end{equation}
 This rate function pulls the random walker towards the obstructions when $\alpha < 1$ and pushes the random walker away when $\alpha > 1$.
 
-{\bf Case \texttt{specialSetting} = `m2\_blockOneSite' or `m2\_slowOneSite':}
-{\bf Must use the driver \texttt{driver\_2x2} in these cases.} Internally, most of the code assumes that $\oE$ can be identified with $(\Pi \times \Pi)(\sE)$. When \texttt{m} = 2, this is not the case and thus should be avoided if possible. Currently, there is a hotfix in place when \texttt{m} = 2 and \texttt{dim} = 2. In this case, the user \emph{must} set \texttt{specialSetting} = `m2\_blockOneSite' or `m2\_slowOneSite'.
-
-When \texttt{specialSetting} = `m2\_blockOneSite', all edges originating or ending in the node $(2/3,2/3)$ are removed. When \texttt{specialSetting} = `m2\_slowOneSite', all edges originating or ending in the node $(2/3,2/3)$ have their rates scaled by \texttt{obSlowdownFctr}.
+{\bf Case \texttt{specialSetting} = `m2\_slowOneSite':}
+This setting can only be used when \texttt{m} = 2. When \texttt{specialSetting} = `m2\_slowOneSite', all edges originating or ending in the node $(3/4,3/4)$ have their rates scaled by \texttt{obSlowdownFctr}. Thus, we enforce \texttt{obCtr} = (3/4,3/4) and \texttt{obRad} $\in (0,1/4)$.
 
 {\bf Case \texttt{specialSetting} = `bdySlow':} {\bf Must use the driver \texttt{driver\_nodesAtBdy} in this case.} This is an experimental setting wherein nodes are placed at the boundary of an obstruction. Rates are doubled along edges that start at the boundary, do not start at a corner, and do not end at the boundary.
  
