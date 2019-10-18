@@ -4,11 +4,11 @@ saveOn = 0;
 verbose = 1;
 
 % geometry parameters
-dim = 2;                    % dimension
-m = 5;                      % mesh parameter
+dim = 3;                    % dimension
+m = 50;                      % mesh parameter
 name = 'circle';            % obstruction type
 obRad = .25;                % obstruction radius
-obCtr = [.5 .5];            % obstruction center
+obCtr = [.5 .5 .5];            % obstruction center
 diagJumps = 0;              % diagonal jumps on/off
 specialSetting = 'none';    % special setting (see README)
 driftMult = 0;              % drift field strength

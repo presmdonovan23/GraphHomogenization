@@ -7,7 +7,7 @@ function [fh, nodes, edges, edgeJumps] = drawCell_lattice(latticeGeo,drawObs,dra
 % geometryName = 'circle';
 % drawObs = 1;
 % ctr = .5;
-% drawSetting(rho,m,ctr,geometryName,drawObs,saveOn)
+% drawCell_lattice(rho,m,ctr,geometryName,drawObs,saveOn)
 
 if nargin < 2 || isempty(drawObs)
     drawObs = 1;
